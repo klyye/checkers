@@ -1,2 +1,3 @@
 (test
- (name checkers))
+ (libraries checkers ounit2)
+ (name test))
