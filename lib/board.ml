@@ -5,6 +5,30 @@ type t = piece option array array
 
 let size = 8
 let blank = Array.make_matrix size size None
-let to_list board = List.concat (Array.to_list (Array.map Array.to_list board))
-(* let put board x y piece = [||]
-   let get board x y = None *)
+let to_2d_list board = Array.to_list (Array.map Array.to_list board)
+
+(* I HATE MUTABILITY!!! I HATE MUTABILITY!! *)
+let put board r c piece =
+  let copy = Array.(map copy) board in
+  let () = copy.(r).(c) <- Some piece in
+  copy
+
+let get board r c = board.(r).(c)
+
+let string_of_square x =
+  match x with
+  | Some y -> (
+      match y with
+      | Normal P1 -> "N1"
+      | King P1 -> "K1"
+      | Normal P2 -> "N2"
+      | King P2 -> "K2")
+  | None -> "--"
+
+let string_of_board b =
+  Array.fold_left
+    (fun acc row ->
+      acc
+      ^ Array.fold_left (fun acc2 p -> acc2 ^ string_of_square p ^ ", ") "" row
+      ^ "\n")
+    "" b
