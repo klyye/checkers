@@ -4,5 +4,6 @@ type t = piece option array array
 
 val size : int
 val blank : t
-val put : t -> int -> int -> piece -> t
-val get : t -> int -> int -> piece
+val to_list : t -> piece option list
+(* val put : t -> int -> int -> piece -> t
+   val get : t -> int -> int -> piece option *)

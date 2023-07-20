@@ -5,5 +5,6 @@ type t = piece option array array
 
 let size = 8
 let blank = Array.make_matrix size size None
-let put board x y piece = [||]
-let get board x y = Normal P1
+let to_list board = List.concat (Array.to_list (Array.map Array.to_list board))
+(* let put board x y piece = [||]
+   let get board x y = None *)
