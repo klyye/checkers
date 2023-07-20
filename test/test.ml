@@ -15,7 +15,6 @@ let board_tests =
          ( "set and get basic" >:: fun _ ->
            let p = Normal P1 in
            let b = put blank 4 7 p in
-           let () = print_endline (string_of_board b) in
            assert_equal (Some p) (get b 4 7) ~printer:string_of_square );
        ]
 
