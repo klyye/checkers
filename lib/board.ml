@@ -6,6 +6,7 @@ type t = piece option array array
 let size = 8
 let blank = Array.make_matrix size size None
 let to_2d_list board = Array.to_list (Array.map Array.to_list board)
+let of_2d_list lst = Array.of_list (List.map Array.of_list lst)
 
 (* I HATE MUTABILITY!!! I HATE MUTABILITY!! *)
 let put board r c piece =

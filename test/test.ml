@@ -1,6 +1,7 @@
 open OUnit2
 open Checkers
 
+(* TODO: test of_2d_list*)
 let board_tests =
   let open Board in
   "test suite for board"
