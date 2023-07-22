@@ -11,7 +11,7 @@ let of_2d_list lst = Array.of_list (List.map Array.of_list lst)
 (* I HATE MUTABILITY!!! I HATE MUTABILITY!! *)
 let put board r c piece =
   let copy = Array.(map copy) board in
-  let () = copy.(r).(c) <- Some piece in
+  let () = copy.(r).(c) <- piece in
   copy
 
 let get board r c = board.(r).(c)
@@ -32,4 +32,4 @@ let string_of_board b =
       acc
       ^ Array.fold_left (fun acc2 p -> acc2 ^ string_of_square p ^ ", ") "" row
       ^ "\n")
-    "" b
+    "\n" b
