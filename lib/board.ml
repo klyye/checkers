@@ -5,8 +5,27 @@ type t = piece option array array
 
 let size = 8
 let blank = Array.make_matrix size size None
+
+let start =
+  let p, q = (Some (Normal P1), Some (Normal P2)) in
+  let n = None in
+  [|
+    [| n; q; n; q; n; q; n; q |];
+    [| q; n; q; n; q; n; q; n |];
+    [| n; q; n; q; n; q; n; q |];
+    [| n; n; n; n; n; n; n; n |];
+    [| n; n; n; n; n; n; n; n |];
+    [| p; n; p; n; p; n; p; n |];
+    [| n; p; n; p; n; p; n; p |];
+    [| p; n; p; n; p; n; p; n |];
+  |]
+
 let to_2d_list board = Array.to_list (Array.map Array.to_list board)
-let of_2d_list lst = Array.of_list (List.map Array.of_list lst)
+
+let of_2d_list lst =
+  if List.length lst <> 8 || List.exists (fun r -> List.length r <> 8) lst then
+    raise (Invalid_argument "Must be 8x8")
+  else Array.of_list (List.map Array.of_list lst)
 
 (* I HATE MUTABILITY!!! I HATE MUTABILITY!! *)
 let put board r c piece =
