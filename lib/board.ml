@@ -45,6 +45,8 @@ let string_of_square x =
       | King P2 -> "K2")
   | None -> "--"
 
+(* TODO: rewrite this so that it prints row and col numbers
+   maybe write a fold_lefti? *)
 let string_of_board b =
   Array.fold_left
     (fun acc row ->
