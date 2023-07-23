@@ -1,6 +1,6 @@
-(* exception IllegalMove *)
+open Move
 
-type move = (int * int) * (int * int)
+(* exception IllegalMove *)
 type t
 
 val init : Board.t -> t
