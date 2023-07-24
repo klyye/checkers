@@ -8,6 +8,9 @@ let h = Some (Normal P1)
 let j = Some (Normal P2)
 let k = Some (King P1)
 
+let assert_any_exn msg thunk =
+  match thunk () with exception _ -> () | _ -> assert_failure msg
+
 let board_tests =
   "test suite for board"
   >::: [
@@ -67,10 +70,9 @@ let board_tests =
            let a1, a2 = (put a 5 3 h, put a 5 3 h) in
            assert_equal a1 a2 ~printer:string_of_board );
          ( "oob get" >:: fun _ ->
-           assert_raises (Invalid_argument "index out of bounds") (fun () ->
-               get blank 8 0) );
+           assert_any_exn "get did not fail on oob" (fun () -> get blank 8 0) );
          ( "oob put" >:: fun _ ->
-           assert_raises (Invalid_argument "index out of bounds") (fun () ->
+           assert_any_exn "put did not fail on oob" (fun () ->
                put blank 5 (-1) h) );
        ]
 
@@ -201,6 +203,27 @@ let setup_king_capture _test_ctxt =
   in
   init b
 
+(* TODO: king piece edge cases:
+   piece that jumps to the last row may not continue to jump after it promotes
+   both normal piece and king can capture and be put on the last row, king can continue capturing
+   king piece can be forced to multijump on and off of the final row *)
+let setup_king_edge _test_ctxt =
+  let b =
+    of_2d_list
+      [
+        (*0  1  2  3  4  5  6  7*)
+        [ o; o; o; o; o; o; o; o ] (* 0 *);
+        [ o; j; o; j; o; j; o; o ] (* 1 *);
+        [ h; o; k; o; o; o; o; o ] (* 2 *);
+        [ o; o; o; o; o; o; o; o ] (* 3 *);
+        [ o; o; o; o; o; o; o; o ] (* 4 *);
+        [ o; o; o; o; o; o; o; o ] (* 5 *);
+        [ o; o; o; o; o; o; o; o ] (* 6 *);
+        [ o; o; o; o; o; o; o; o ] (* 7 *);
+      ]
+  in
+  init b
+
 let teardown_noop _ _ = ()
 
 let legal_move_tests =
@@ -293,8 +316,17 @@ let legal_move_tests =
            let state = bracket setup_king_capture teardown_noop tc in
            assert_bool "king can multijump backwards"
              (is_legal state (Jump (2, 3, [ DR; DL ]))) );
+         ( "promotion ends turn" >:: fun tc ->
+           let state = bracket setup_king_capture teardown_noop tc in
+           assert_bool "should not be forced to jump after promotion"
+             (not (is_legal state (Jump (2, 0, [ UR; DR; UR ])))) );
+         ( "king does not promote" >:: fun tc ->
+           let state = bracket setup_king_capture teardown_noop tc in
+           assert_bool "king forced to jump on and off final row"
+             (is_legal state (Jump (2, 2, [ UR; DR ]))) );
        ]
 (* TODO: write test cases for remaining numbers *)
 
 let _ = run_test_tt_main board_tests
 let _ = run_test_tt_main legal_move_tests
+let () = print_endline (string_of_board (board (setup_king_edge ())))

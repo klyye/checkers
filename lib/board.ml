@@ -23,8 +23,9 @@ let start =
 let to_2d_list board = Array.to_list (Array.map Array.to_list board)
 
 let of_2d_list lst =
-  if List.length lst <> 8 || List.exists (fun r -> List.length r <> 8) lst then
-    raise (Invalid_argument "Must be 8x8")
+  if List.length lst <> size || List.exists (fun r -> List.length r <> size) lst
+  then
+    raise (Invalid_argument ("Must be " ^ string_of_int size ^ " size square"))
   else Array.of_list (List.map Array.of_list lst)
 
 (* I HATE MUTABILITY!!! I HATE MUTABILITY!! *)
