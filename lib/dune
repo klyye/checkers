@@ -1,2 +1,4 @@
 (library
+ (flags
+  (:standard -w +A-42-48 -warn-error +A-3-44))
  (name checkers))
