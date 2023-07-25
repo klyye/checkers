@@ -12,3 +12,4 @@ val put : t -> int -> int -> piece option -> t
 val get : t -> int -> int -> piece option
 val string_of_square : piece option -> string
 val string_of_board : t -> string
+val opp_player : player -> player

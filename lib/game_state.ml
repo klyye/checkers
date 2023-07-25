@@ -12,54 +12,54 @@ type t = {
 
 let init board = { board; curr_player = P1 }
 let board state = state.board
-
-(*
-    Ruleset: https://www.se.rit.edu/~swen-261/projects/WebCheckers/American%20Rules.html
-
-    Illegal Simple Moves:
-    1 Tried to move opponent's piece
-    2 Tried to move blank space
-    3 Tried to move Normal piece backwards
-    4 Tried to move onto occupied space
-
-    Illegal Jump Moves:
-    7 Tried to take simple move when jump was an option
-    8 Tried to end jump early when another capture existed
-    9 Tried to jump backwards with normal piece
-    10 tried to capture piece on edge/corner
-    11 Tried to jump without capture
-
-    legal edge case moves:
-    1 Took a single jump when a multi jump was available
-    2 two possible jump options after single jump should both be available
-    3 "diamond" move where you can land on the same square via jumping UR UL or UL UR
-    4 king should be able to jump backwards
-    5 king should be able to simple move backwards
-
-  *)
-let player_dirs = [ (P1, U); (P2, D) ]
 let is_oob r c = r < 0 || r >= size || c < 0 || c >= size
+let player_dirs = [ (P1, U); (P2, D) ]
 
-let is_movable state r c =
+let piece_dirs piece =
+  match piece with
+  | { is_king = true; _ } -> [ (U, L); (U, R); (D, L); (D, R) ]
+  | { player = p; is_king = false } ->
+      let v = List.assoc p player_dirs in
+      [ (v, L); (v, R) ]
+
+let is_piece_at state r c player =
   (not (is_oob r c))
   &&
   let piece = get state.board r c in
-  Option.fold ~none:false ~some:(fun p -> p.player = state.curr_player) piece
+  Option.fold ~none:false ~some:(fun p -> p.player = player) piece
 
-let (* rec *) is_jump_legal _state _r _c jumps =
-  match jumps with [] -> false | _hd :: _rst -> false
+let is_jump_legal state r c piece dir =
+  let adj_r, adj_c = step r c dir 1 in
+  let dest_r, dest_c = step r c dir 2 in
+  List.mem dir (piece_dirs piece)
+  && (not (is_oob adj_r adj_c))
+  && is_piece_at state adj_r adj_c (opp_player piece.player)
+  && (not (is_oob dest_r dest_c))
+  && Option.is_none (get state.board dest_r dest_c)
+
+let are_jumps_possible state r c piece =
+  List.exists (fun dir -> is_jump_legal state r c piece dir) (piece_dirs piece)
+
+let rec are_jumps_legal state r c piece jumps =
+  match jumps with
+  | [] -> not (are_jumps_possible state r c piece)
+  | dir :: rst ->
+      let dest_r, dest_c = step r c dir 2 in
+      is_jump_legal state r c piece dir
+      && are_jumps_legal state dest_r dest_c piece rst
+
+(* check if landing space is empty *)
 
 let is_legal state move =
-  if is_movable state move.r move.c then
+  if is_piece_at state move.r move.c state.curr_player then
     let piece = Option.get (get state.board move.r move.c) in
+    let adj_r, adj_c = step move.r move.c move.dir 1 in
     match move.kind with
     | Simple ->
-        let v, _ = move.dir in
-        let adj_r, adj_c = adj move.r move.c move.dir in
         Option.is_none (get state.board adj_r adj_c)
-        && (piece.is_king || v = List.assoc piece.player player_dirs)
-        (* separate recursive helper function *)
-    | Jump lst -> is_jump_legal state move.r move.c (move.dir :: lst)
+        && List.mem move.dir (piece_dirs piece)
+        && not (are_jumps_possible state move.r move.c piece)
+    | Jump lst -> are_jumps_legal state move.r move.c piece (move.dir :: lst)
   else false
 
 (* let make_move state move =

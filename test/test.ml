@@ -208,6 +208,23 @@ let setup_king_capture _test_ctxt =
   in
   init b
 
+let setup_king_cycle _test_ctxt =
+  let b =
+    of_2d_list
+      [
+        (*0  1  2  3  4  5  6  7*)
+        [ o; o; o; o; o; o; o; o ] (* 0 *);
+        [ o; o; o; o; o; o; o; o ] (* 1 *);
+        [ o; o; o; k; o; o; o; o ] (* 2 *);
+        [ o; o; j; o; j; o; o; o ] (* 3 *);
+        [ o; o; o; o; o; o; o; o ] (* 4 *);
+        [ o; o; j; o; j; o; o; o ] (* 5 *);
+        [ o; o; o; o; o; o; o; o ] (* 6 *);
+        [ o; o; o; o; o; o; o; o ] (* 7 *);
+      ]
+  in
+  init b
+
 let setup_king_edge _test_ctxt =
   let b =
     of_2d_list
@@ -345,6 +362,17 @@ let legal_move_tests =
            assert_bool "king can multijump backwards"
              (is_legal state
                 { r = 2; c = 3; dir = (D, R); kind = Jump [ (D, L) ] }) );
+         ( "king cycle illegal" >:: fun tc ->
+           let state = bracket setup_king_cycle teardown_noop tc in
+           assert_bool "king should not be able to recapture captured piece"
+             (not
+                (is_legal state
+                   {
+                     r = 2;
+                     c = 3;
+                     dir = (D, R);
+                     kind = Jump [ (D, L); (U, L); (U, R); (D, R) ];
+                   })) );
          ( "promotion ends turn" >:: fun tc ->
            let state = bracket setup_king_edge teardown_noop tc in
            assert_bool "should not be forced to jump after promotion"

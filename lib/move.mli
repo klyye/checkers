@@ -4,4 +4,4 @@ type direction = vert_dir * horiz_dir
 type move_kind = Simple | Jump of direction list
 type move = { r : int; c : int; dir : direction; kind : move_kind }
 
-val adj : int -> int -> direction -> int * int
+val step : int -> int -> direction -> int -> int * int

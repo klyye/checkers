@@ -4,7 +4,8 @@ type direction = vert_dir * horiz_dir
 type move_kind = Simple | Jump of direction list
 type move = { r : int; c : int; dir : direction; kind : move_kind }
 
-let adj r c dir =
+(* in retrospect i couldve just made some sort of 2d vector class but probably overkill *)
+let step r c dir dist =
   let v, h = dir in
-  ( (match v with U -> r - 1 | D -> r + 1),
-    match h with L -> c - 1 | R -> c + 1 )
+  ( (match v with U -> r - dist | D -> r + dist),
+    match h with L -> c - dist | R -> c + dist )

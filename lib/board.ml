@@ -58,3 +58,5 @@ let string_of_board b =
       ^ Array.fold_left (fun acc2 p -> acc2 ^ string_of_square p ^ ", ") "" row
       ^ "\n")
     "\n" b
+
+let opp_player p = if p = P1 then P2 else P1

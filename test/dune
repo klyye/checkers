@@ -1,3 +1,4 @@
 (test
  (libraries checkers ounit2)
+ (modes byte exe)
  (name test))
