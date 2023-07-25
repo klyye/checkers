@@ -1,16 +1,16 @@
-(* open Board
-   open Move *)
+open Board
+open Move
 
 (* exception IllegalMove of string *)
 
 type t = {
   board : Board.t;
-      (* curr_player : player; *)
+  curr_player : player;
       (* TODO: hash map of board states to counts for three move stalemates clause *)
       (* TODO: might be simpler to generate list of legal moves and then just check if user input is contained in that list *)
 }
 
-let init board = { board (* curr_player = P1 *) }
+let init board = { board; curr_player = P1 }
 let board state = state.board
 
 (*
@@ -37,27 +37,30 @@ let board state = state.board
     5 king should be able to simple move backwards
 
   *)
-(* let player_dirs = [ (P1, [ UL; UR ]); (P2, [ DL; DR ]) ] *)
+let player_dirs = [ (P1, U); (P2, D) ]
+let is_oob r c = r < 0 || r >= size || c < 0 || c >= size
 
-let (* rec *) is_legal _state _move =
-  (* TODO: bounds checking *)
-  (* let b = state.board in
-     let match_piece r c ~normal ~king =
-       match get b r c with
-       | Some (Normal player) -> normal player
-       | Some (King player) -> king player
-       | None -> false
-       | exception Invalid_argument _ -> false
-     in
-     match move with
-     | Simple (r, c, dir) ->
-         match_piece r c
-           ~normal:(fun player -> List.mem dir (List.assoc player player_dirs))
-           ~king:(fun player -> false)
-     | Jump (_, _, []) -> raise (Invalid_argument "Jump with no directions")
-     | Jump (r, c, [ last ]) -> false
-     | Jump (r, c, dir :: rst) -> false *)
-  false
+let is_movable state r c =
+  (not (is_oob r c))
+  &&
+  let piece = get state.board r c in
+  Option.fold ~none:false ~some:(fun p -> p.player = state.curr_player) piece
+
+let (* rec *) is_jump_legal _state _r _c jumps =
+  match jumps with [] -> false | _hd :: _rst -> false
+
+let is_legal state move =
+  if is_movable state move.r move.c then
+    let piece = Option.get (get state.board move.r move.c) in
+    match move.kind with
+    | Simple ->
+        let v, _ = move.dir in
+        let adj_r, adj_c = adj move.r move.c move.dir in
+        Option.is_none (get state.board adj_r adj_c)
+        && (piece.is_king || v = List.assoc piece.player player_dirs)
+        (* separate recursive helper function *)
+    | Jump lst -> is_jump_legal state move.r move.c (move.dir :: lst)
+  else false
 
 (* let make_move state move =
    if is_legal state move then

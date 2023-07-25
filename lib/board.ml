@@ -1,13 +1,16 @@
 (* Gotta make my own immutable board type since OCaml doesn't have immutable arrays by default and I don't want to use Jane Street's library *)
 type player = P1 | P2
-type piece = Normal of player | King of player
+type piece = { player : player; is_king : bool }
 type t = piece option array array
 
 let size = 8
 let blank = Array.make_matrix size size None
 
 let start =
-  let p, q = (Some (Normal P1), Some (Normal P2)) in
+  let p, q =
+    ( Some { player = P1; is_king = false },
+      Some { player = P2; is_king = false } )
+  in
   let n = None in
   [|
     [| n; q; n; q; n; q; n; q |];
@@ -37,14 +40,14 @@ let put board r c piece =
 let get board r c = board.(r).(c)
 
 let string_of_square x =
-  match x with
-  | Some y -> (
+  Option.fold ~none:"--"
+    ~some:(fun y ->
       match y with
-      | Normal P1 -> "N1"
-      | King P1 -> "K1"
-      | Normal P2 -> "N2"
-      | King P2 -> "K2")
-  | None -> "--"
+      | { player = P1; is_king = false } -> "N1"
+      | { player = P1; is_king = true } -> "K1"
+      | { player = P2; is_king = false } -> "N2"
+      | { player = P2; is_king = true } -> "K2")
+    x
 
 (* TODO: rewrite this so that it prints row and col numbers
    maybe write a fold_lefti? *)

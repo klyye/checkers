@@ -1,5 +1,5 @@
 type player = P1 | P2
-type piece = Normal of player | King of player
+type piece = { player : player; is_king : bool }
 type t
 (* there is no square type; a square is a piece option *)
 

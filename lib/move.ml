@@ -1,10 +1,10 @@
-type direction = UL | UR | DL | DR
+type vert_dir = U | D
+type horiz_dir = L | R
+type direction = vert_dir * horiz_dir
 type move_kind = Simple | Jump of direction list
 type move = { r : int; c : int; dir : direction; kind : move_kind }
 
-let move_dir r c dir =
-  match dir with
-  | UL -> (r - 1, c - 1)
-  | UR -> (r - 1, c + 1)
-  | DL -> (r + 1, c - 1)
-  | DR -> (r + 1, c + 1)
+let adj r c dir =
+  let v, h = dir in
+  ( (match v with U -> r - 1 | D -> r + 1),
+    match h with L -> c - 1 | R -> c + 1 )
