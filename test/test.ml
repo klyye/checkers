@@ -373,6 +373,16 @@ let legal_move_tests =
                      dir = (D, R);
                      kind = Jump [ (D, L); (U, L); (U, R); (D, R) ];
                    })) );
+         ( "king cycle legal" >:: fun tc ->
+           let state = bracket setup_king_cycle teardown_noop tc in
+           assert_bool "king should be able to jump in a circle"
+             (is_legal state
+                {
+                  r = 2;
+                  c = 3;
+                  dir = (D, R);
+                  kind = Jump [ (D, L); (U, L); (U, R) ];
+                }) );
          ( "promotion ends turn" >:: fun tc ->
            let state = bracket setup_king_edge teardown_noop tc in
            assert_bool "should not be forced to jump after promotion"
