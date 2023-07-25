@@ -6,11 +6,12 @@ open Move
 type t = {
   board : Board.t;
   curr_player : player;
+  capturing_piece : (int * int) option;
       (* TODO: hash map of board states to counts for three move stalemates clause *)
       (* TODO: might be simpler to generate list of legal moves and then just check if user input is contained in that list *)
 }
 
-let init board = { board; curr_player = P1 }
+let init board = { board; curr_player = P1; capturing_piece = None }
 let board state = state.board
 let is_oob r c = r < 0 || r >= size || c < 0 || c >= size
 let player_dirs = [ (P1, U); (P2, D) ]
@@ -40,6 +41,7 @@ let is_jump_legal state r c piece dir =
 let are_jumps_possible state r c piece =
   List.exists (fun dir -> is_jump_legal state r c piece dir) (piece_dirs piece)
 
+(* FIXME: needs to account for pieces already captured*)
 let rec are_jumps_legal state r c piece jumps =
   match jumps with
   | [] -> not (are_jumps_possible state r c piece)
