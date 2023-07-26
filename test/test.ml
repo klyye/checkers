@@ -226,7 +226,7 @@ let _setup_king_cycle _test_ctxt =
   in
   init ~board:b ()
 
-let setup_king_edge _test_ctxt =
+let _setup_king_edge _test_ctxt =
   let b =
     of_2d_list
       [
@@ -301,7 +301,7 @@ let legal_move_tests =
          );
          ( "illegal forced jump 2" >:: fun tc ->
            let state = bracket setup_capture teardown_noop tc in
-           assert_bool "must take forced jump"
+           assert_bool "cannot simple move if forced jump"
              (not
                 (is_legal state { r = 3; c = 6; dir = (U, L); is_jump = false }))
          );
@@ -350,11 +350,15 @@ let legal_move_tests =
          ( "mid jump: illegal to move another piece" >:: fun tc ->
            let state = bracket setup_mid_jump teardown_noop tc in
            assert_bool "cannot move piece that is not currently jumping"
-             (is_legal state { r = 4; c = 6; dir = (U, R); is_jump = false }) );
+             (not
+                (is_legal state { r = 4; c = 6; dir = (U, R); is_jump = false }))
+         );
          ( "mid jump: illegal to jump another piece" >:: fun tc ->
            let state = bracket setup_mid_jump teardown_noop tc in
            assert_bool "cannot jump piece that is not currently jumping"
-             (is_legal state { r = 4; c = 6; dir = (U, L); is_jump = true }) );
+             (not
+                (is_legal state { r = 4; c = 6; dir = (U, L); is_jump = true }))
+         );
          ( "mid jump: illegal to take simple move" >:: fun tc ->
            let state = bracket setup_mid_jump teardown_noop tc in
            assert_bool "cannot simple move after jumping"
@@ -439,4 +443,3 @@ let legal_move_tests =
 
 let _ = run_test_tt_main board_tests
 let _ = run_test_tt_main legal_move_tests
-let () = print_endline (string_of_board (board (setup_king_edge ())))
