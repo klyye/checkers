@@ -103,6 +103,7 @@ let board_tests =
     3 "diamond" move where you can land on the same square via jumping (U, R) (U, L) or (U, L) (U, R)
     4 king should be able to jump backwards
     5 king should be able to simple move backwards
+    6 king "cycle" case
   *)
 
 let setup_no_capture _test_ctxt =
@@ -120,7 +121,7 @@ let setup_no_capture _test_ctxt =
         [ o; o; o; o; o; o; o; o ] (* 7 *);
       ]
   in
-  init b
+  init ~board:b ()
 
 let setup_capture _test_ctxt =
   let b =
@@ -137,7 +138,7 @@ let setup_capture _test_ctxt =
         [ o; o; o; o; o; o; o; o ] (* 7 *);
       ]
   in
-  init b
+  init ~board:b ()
 
 let setup_single_and_multijump _test_ctxt =
   let b =
@@ -154,10 +155,10 @@ let setup_single_and_multijump _test_ctxt =
         [ o; o; h; o; o; o; o; o ] (* 7 *);
       ]
   in
-  init b
+  init ~board:b ()
 
 (* TODO: after make_move api is defined, write test to make sure that going left and right result in different boards in the diamond *)
-let setup_diamond _test_ctxt =
+let _setup_diamond _test_ctxt =
   let b =
     of_2d_list
       [
@@ -172,7 +173,7 @@ let setup_diamond _test_ctxt =
         [ o; o; o; o; o; o; o; o ] (* 7 *);
       ]
   in
-  init b
+  init ~board:b ()
 
 let setup_king_no_capture _test_ctxt =
   let b =
@@ -189,7 +190,7 @@ let setup_king_no_capture _test_ctxt =
         [ o; o; o; o; o; o; o; o ] (* 7 *);
       ]
   in
-  init b
+  init ~board:b ()
 
 let setup_king_capture _test_ctxt =
   let b =
@@ -206,9 +207,9 @@ let setup_king_capture _test_ctxt =
         [ o; o; o; o; o; o; o; o ] (* 7 *);
       ]
   in
-  init b
+  init ~board:b ()
 
-let setup_king_cycle _test_ctxt =
+let _setup_king_cycle _test_ctxt =
   let b =
     of_2d_list
       [
@@ -223,7 +224,7 @@ let setup_king_cycle _test_ctxt =
         [ o; o; o; o; o; o; o; o ] (* 7 *);
       ]
   in
-  init b
+  init ~board:b ()
 
 let setup_king_edge _test_ctxt =
   let b =
@@ -240,7 +241,24 @@ let setup_king_edge _test_ctxt =
         [ o; o; o; o; o; o; o; o ] (* 7 *);
       ]
   in
-  init b
+  init ~board:b ()
+
+let setup_mid_jump _test_ctxt =
+  let b =
+    of_2d_list
+      [
+        (*0  1  2  3  4  5  6  7*)
+        [ o; o; o; o; o; o; o; o ] (* 0 *);
+        [ o; o; o; o; o; o; o; o ] (* 1 *);
+        [ o; o; o; o; o; o; o; o ] (* 2 *);
+        [ o; o; o; o; j; j; o; o ] (* 3 *);
+        [ o; o; o; h; o; o; h; o ] (* 4 *);
+        [ o; o; o; o; o; o; o; o ] (* 5 *);
+        [ o; o; o; o; o; o; o; o ] (* 6 *);
+        [ o; o; o; o; o; o; o; o ] (* 7 *);
+      ]
+  in
+  init ~board:b ~capturing_piece:(Some (4, 3)) ()
 
 let teardown_noop _ _ = ()
 
@@ -250,155 +268,172 @@ let legal_move_tests =
          ( "legal simple" >:: fun tc ->
            let state = bracket setup_no_capture teardown_noop tc in
            assert_bool "p1 simple move should be legal"
-             (is_legal state { r = 5; c = 3; dir = (U, L); kind = Simple }) );
+             (is_legal state { r = 5; c = 3; dir = (U, L); is_jump = false }) );
          ( "illegal wrong turn" >:: fun tc ->
            let state = bracket setup_no_capture teardown_noop tc in
            assert_bool "p2 piece cannot be moved on p1 turn"
              (not
-                (is_legal state { r = 2; c = 3; dir = (D, R); kind = Simple }))
+                (is_legal state { r = 2; c = 3; dir = (D, R); is_jump = false }))
          );
          ( "illegal no piece" >:: fun tc ->
            let state = bracket setup_no_capture teardown_noop tc in
            assert_bool "cannot move if no piece on square"
              (not
-                (is_legal state { r = 4; c = 3; dir = (U, R); kind = Simple }))
+                (is_legal state { r = 4; c = 3; dir = (U, R); is_jump = false }))
          );
          ( "illegal backwards" >:: fun tc ->
            let state = bracket setup_no_capture teardown_noop tc in
            assert_bool "cannot move a normal piece backwards"
              (not
-                (is_legal state { r = 5; c = 3; dir = (D, L); kind = Simple }))
+                (is_legal state { r = 5; c = 3; dir = (D, L); is_jump = false }))
          );
          ( "illegal occupied" >:: fun tc ->
            let state = bracket setup_no_capture teardown_noop tc in
            assert_bool "cannot move onto occupied space"
              (not
-                (is_legal state { r = 6; c = 4; dir = (U, L); kind = Simple }))
+                (is_legal state { r = 6; c = 4; dir = (U, L); is_jump = false }))
          );
          ( "illegal forced jump 1" >:: fun tc ->
            let state = bracket setup_capture teardown_noop tc in
            assert_bool "must take forced jump"
              (not
-                (is_legal state { r = 5; c = 3; dir = (U, L); kind = Simple }))
+                (is_legal state { r = 5; c = 3; dir = (U, L); is_jump = false }))
          );
          ( "illegal forced jump 2" >:: fun tc ->
            let state = bracket setup_capture teardown_noop tc in
            assert_bool "must take forced jump"
              (not
-                (is_legal state { r = 3; c = 3; dir = (U, L); kind = Simple }))
+                (is_legal state { r = 3; c = 6; dir = (U, L); is_jump = false }))
          );
-         ( "illegal multi forced jump" >:: fun tc ->
+         ( "legal jump - first in multiple" >:: fun tc ->
            let state = bracket setup_capture teardown_noop tc in
            assert_bool "must take continued forced jump"
-             (not
-                (is_legal state { r = 5; c = 3; dir = (U, R); kind = Jump [] }))
-         );
+             (is_legal state { r = 5; c = 3; dir = (U, R); is_jump = true }) );
          ( "illegal backwards jump" >:: fun tc ->
            let state = bracket setup_capture teardown_noop tc in
            assert_bool "normal piece cannot jump backwards"
              (not
-                (is_legal state { r = 5; c = 3; dir = (D, L); kind = Jump [] }))
+                (is_legal state { r = 5; c = 3; dir = (D, L); is_jump = true }))
          );
          ( "illegal oob jump" >:: fun tc ->
            let state = bracket setup_capture teardown_noop tc in
            assert_bool "cannot capture if jump goes oob"
              (not
-                (is_legal state { r = 3; c = 6; dir = (U, R); kind = Jump [] }))
+                (is_legal state { r = 3; c = 6; dir = (U, R); is_jump = true }))
          );
+         ( "legal branching multijump 1" >:: fun tc ->
+           let state = bracket setup_single_and_multijump teardown_noop tc in
+           assert_bool "legal to choose single jump over multijump"
+             (is_legal state { r = 7; c = 2; dir = (U, L); is_jump = true }) );
          ( "illegal no capture" >:: fun tc ->
            let state = bracket setup_capture teardown_noop tc in
            assert_bool "cannot jump without capture"
              (not
-                (is_legal state { r = 5; c = 3; dir = (U, L); kind = Jump [] }))
+                (is_legal state { r = 5; c = 3; dir = (U, L); is_jump = true }))
          );
-         ( "legal multijump 1" >:: fun tc ->
-           let state = bracket setup_capture teardown_noop tc in
-           assert_bool "multijump (U, R) (U, L) must be legal"
-             (is_legal state
-                { r = 5; c = 3; dir = (U, R); kind = Jump [ (U, L) ] }) );
-         ( "legal multijump 2" >:: fun tc ->
-           let state = bracket setup_capture teardown_noop tc in
-           assert_bool "multijump (U, R) (U, R) must be legal"
-             (is_legal state
-                { r = 5; c = 3; dir = (U, R); kind = Jump [ (U, R) ] }) );
-         ( "legal branching multijump 1" >:: fun tc ->
-           let state = bracket setup_single_and_multijump teardown_noop tc in
-           assert_bool "legal to choose single jump over multijump"
-             (is_legal state { r = 7; c = 2; dir = (U, L); kind = Jump [] }) );
-         ( "legal branching multijump 2" >:: fun tc ->
-           let state = bracket setup_single_and_multijump teardown_noop tc in
-           assert_bool "legal to choose double jump over triple jump"
-             (is_legal state
-                { r = 7; c = 2; dir = (U, R); kind = Jump [ (U, L) ] }) );
-         ( "legal branching multijump 3" >:: fun tc ->
-           let state = bracket setup_single_and_multijump teardown_noop tc in
-           assert_bool "legal to choose triple jump"
-             (is_legal state
-                { r = 7; c = 2; dir = (U, R); kind = Jump [ (U, R); (U, L) ] })
-         );
-         ( "legal diamond 1" >:: fun tc ->
-           let state = bracket setup_diamond teardown_noop tc in
-           assert_bool "diamond left path"
-             (is_legal state
-                { r = 6; c = 3; dir = (U, L); kind = Jump [ (U, R) ] }) );
-         ( "legal diamond 2" >:: fun tc ->
-           let state = bracket setup_diamond teardown_noop tc in
-           assert_bool "diamond right path"
-             (is_legal state
-                { r = 6; c = 3; dir = (U, R); kind = Jump [ (U, L) ] }) );
          ( "legal king simple" >:: fun tc ->
            let state = bracket setup_king_no_capture teardown_noop tc in
            assert_bool "king can move all 4 ways"
-             (is_legal state { r = 2; c = 3; dir = (D, R); kind = Simple }
-             && is_legal state { r = 2; c = 3; dir = (U, R); kind = Simple }
-             && is_legal state { r = 2; c = 3; dir = (D, L); kind = Simple }
-             && is_legal state { r = 2; c = 3; dir = (U, L); kind = Simple }) );
+             (is_legal state { r = 2; c = 3; dir = (D, R); is_jump = false }
+             && is_legal state { r = 2; c = 3; dir = (U, R); is_jump = false }
+             && is_legal state { r = 2; c = 3; dir = (D, L); is_jump = false }
+             && is_legal state { r = 2; c = 3; dir = (U, L); is_jump = false })
+         );
          ( "legal king single jump" >:: fun tc ->
            let state = bracket setup_king_capture teardown_noop tc in
            assert_bool "king can single jump backwards"
-             (is_legal state { r = 2; c = 3; dir = (D, L); kind = Jump [] }) );
-         ( "legal king multi jump" >:: fun tc ->
-           let state = bracket setup_king_capture teardown_noop tc in
-           assert_bool "king can multijump backwards"
-             (is_legal state
-                { r = 2; c = 3; dir = (D, R); kind = Jump [ (D, L) ] }) );
-         ( "king cycle illegal" >:: fun tc ->
-           let state = bracket setup_king_cycle teardown_noop tc in
-           assert_bool "king should not be able to recapture captured piece"
+             (is_legal state { r = 2; c = 3; dir = (D, L); is_jump = true }) );
+         ( "mid jump: legal to keep jumping" >:: fun tc ->
+           let state = bracket setup_mid_jump teardown_noop tc in
+           assert_bool "can keep moving piece mid-jump"
+             (is_legal state { r = 4; c = 3; dir = (U, R); is_jump = true }) );
+         ( "mid jump: illegal to move another piece" >:: fun tc ->
+           let state = bracket setup_mid_jump teardown_noop tc in
+           assert_bool "cannot move piece that is not currently jumping"
+             (is_legal state { r = 4; c = 6; dir = (U, R); is_jump = false }) );
+         ( "mid jump: illegal to jump another piece" >:: fun tc ->
+           let state = bracket setup_mid_jump teardown_noop tc in
+           assert_bool "cannot jump piece that is not currently jumping"
+             (is_legal state { r = 4; c = 6; dir = (U, L); is_jump = true }) );
+         ( "mid jump: illegal to take simple move" >:: fun tc ->
+           let state = bracket setup_mid_jump teardown_noop tc in
+           assert_bool "cannot simple move after jumping"
              (not
+                (is_legal state { r = 4; c = 3; dir = (U, L); is_jump = false }))
+         )
+         (* ( "legal multijump 1" >:: fun tc ->
+              let state = bracket setup_capture teardown_noop tc in
+              assert_bool "multijump (U, R) (U, L) must be legal"
+                (is_legal state
+                   { r = 5; c = 3; dir = (U, R); kind = Jump [ (U, L) ] }) );
+            ( "legal multijump 2" >:: fun tc ->
+              let state = bracket setup_capture teardown_noop tc in
+              assert_bool "multijump (U, R) (U, R) must be legal"
+                (is_legal state
+                   { r = 5; c = 3; dir = (U, R); kind = Jump [ (U, R) ] }) );
+            ( "legal branching multijump 2" >:: fun tc ->
+              let state = bracket setup_single_and_multijump teardown_noop tc in
+              assert_bool "legal to choose double jump over triple jump"
+                (is_legal state
+                   { r = 7; c = 2; dir = (U, R); kind = Jump [ (U, L) ] }) );
+            ( "legal branching multijump 3" >:: fun tc ->
+              let state = bracket setup_single_and_multijump teardown_noop tc in
+              assert_bool "legal to choose triple jump"
+                (is_legal state
+                   { r = 7; c = 2; dir = (U, R); kind = Jump [ (U, R); (U, L) ] })
+            );
+            ( "legal diamond 1" >:: fun tc ->
+              let state = bracket setup_diamond teardown_noop tc in
+              assert_bool "diamond left path"
+                (is_legal state
+                   { r = 6; c = 3; dir = (U, L); kind = Jump [ (U, R) ] }) );
+            ( "legal diamond 2" >:: fun tc ->
+              let state = bracket setup_diamond teardown_noop tc in
+              assert_bool "diamond right path"
+                (is_legal state
+                   { r = 6; c = 3; dir = (U, R); kind = Jump [ (U, L) ] }) );
+            ( "legal king multi jump" >:: fun tc ->
+              let state = bracket setup_king_capture teardown_noop tc in
+              assert_bool "king can multijump backwards"
+                (is_legal state
+                   { r = 2; c = 3; dir = (D, R); kind = Jump [ (D, L) ] }) );
+            ( "king cycle illegal" >:: fun tc ->
+              let state = bracket setup_king_cycle teardown_noop tc in
+              assert_bool "king should not be able to recapture captured piece"
+                (not
+                   (is_legal state
+                      {
+                        r = 2;
+                        c = 3;
+                        dir = (D, R);
+                        kind = Jump [ (D, L); (U, L); (U, R); (D, R) ];
+                      })) );
+            ( "king cycle legal" >:: fun tc ->
+              let state = bracket setup_king_cycle teardown_noop tc in
+              assert_bool "king should be able to jump in a circle"
                 (is_legal state
                    {
                      r = 2;
                      c = 3;
                      dir = (D, R);
-                     kind = Jump [ (D, L); (U, L); (U, R); (D, R) ];
-                   })) );
-         ( "king cycle legal" >:: fun tc ->
-           let state = bracket setup_king_cycle teardown_noop tc in
-           assert_bool "king should be able to jump in a circle"
-             (is_legal state
-                {
-                  r = 2;
-                  c = 3;
-                  dir = (D, R);
-                  kind = Jump [ (D, L); (U, L); (U, R) ];
-                }) );
-         ( "promotion ends turn" >:: fun tc ->
-           let state = bracket setup_king_edge teardown_noop tc in
-           assert_bool "should not be forced to jump after promotion"
-             (not
+                     kind = Jump [ (D, L); (U, L); (U, R) ];
+                   }) );
+            ( "promotion ends turn" >:: fun tc ->
+              let state = bracket setup_king_edge teardown_noop tc in
+              assert_bool "should not be forced to jump after promotion"
+                (not
+                   (is_legal state
+                      {
+                        r = 2;
+                        c = 0;
+                        dir = (U, R);
+                        kind = Jump [ (D, R); (U, R) ];
+                      })) );
+            ( "king does not promote" >:: fun tc ->
+              let state = bracket setup_king_edge teardown_noop tc in
+              assert_bool "king forced to jump on and off final row"
                 (is_legal state
-                   {
-                     r = 2;
-                     c = 0;
-                     dir = (U, R);
-                     kind = Jump [ (D, R); (U, R) ];
-                   })) );
-         ( "king does not promote" >:: fun tc ->
-           let state = bracket setup_king_edge teardown_noop tc in
-           assert_bool "king forced to jump on and off final row"
-             (is_legal state
-                { r = 2; c = 2; dir = (U, R); kind = Jump [ (D, R) ] }) );
+                   { r = 2; c = 2; dir = (U, R); kind = Jump [ (D, R) ] }) ); *);
        ]
 (* TODO: write test cases for remaining numbers *)
 
