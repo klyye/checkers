@@ -57,6 +57,20 @@ let board_tests =
              ]
            in
            assert_equal lst (to_2d_list (of_2d_list lst)) );
+         ( "piece set p1" >:: fun _ ->
+           let lst =
+             [
+               [ h; o; o; o; o; o; o; k ];
+               [ o; o; o; o; o; o; o; o ];
+               [ o; o; o; o; o; o; o; o ];
+               [ o; o; o; j; j; o; o; o ];
+               [ o; o; o; j; j; o; o; o ];
+               [ o; o; o; o; o; o; o; o ];
+               [ o; o; o; o; o; o; o; o ];
+               [ k; o; o; o; o; o; o; h ];
+             ]
+           in
+           assert_equal false true (* TODO *) );
          ( "immutability basic 1" >:: fun _ ->
            let a, b = (blank, blank) in
            let a1, b1 = (put a 4 1 h, put b 4 1 h) in

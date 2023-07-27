@@ -60,3 +60,4 @@ let string_of_board b =
     "\n" b
 
 let opp_player p = if p = P1 then P2 else P1
+let piece_coord_set board player = Utility.CoordSet.empty (* TODO *)

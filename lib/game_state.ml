@@ -7,13 +7,10 @@ type t = {
   board : Board.t;
   curr_player : player;
   capturing_piece : (int * int) option;
+  legal_moves : move list;
       (* TODO: hash map of board states to counts for three move stalemates clause *)
       (* TODO: might be simpler to generate list of legal moves and then just check if user input is contained in that list *)
 }
-
-(* https://stackoverflow.com/questions/1667232/optional-argument-cannot-be-erased *)
-let init ?(board = start) ?(curr_player = P1) ?(capturing_piece = None) () =
-  { board; curr_player; capturing_piece }
 
 let board state = state.board
 let is_oob r c = r < 0 || r >= size || c < 0 || c >= size
@@ -46,9 +43,8 @@ let is_jump_legal state r c piece dir =
 let are_jumps_possible state r c piece =
   List.exists (fun dir -> is_jump_legal state r c piece dir) (piece_dirs piece)
 
-(* check if landing space is empty *)
-
 let is_legal state move =
+  (* TODO: idea: List.mem move state.legal_moves *)
   if is_piece_at state move.r move.c state.curr_player then
     let piece = Option.get (get state.board move.r move.c) in
     let adj_r, adj_c = step move.r move.c move.dir 1 in
@@ -60,6 +56,18 @@ let is_legal state move =
       && not (are_jumps_possible state move.r move.c piece)
   else false
 
+let generate_legal_moves _board _curr_player _capturing_piece = []
+
+(* https://stackoverflow.com/questions/1667232/optional-argument-cannot-be-erased *)
+let init ?(board = start) ?(curr_player = P1) ?(capturing_piece = None) () =
+  {
+    board;
+    curr_player;
+    capturing_piece;
+    legal_moves = generate_legal_moves board curr_player capturing_piece;
+  }
+
+let legal_moves state = state.legal_moves
 (* let make_move state move =
    if is_legal state move then
      let src, dest = move in
@@ -69,7 +77,6 @@ let is_legal state move =
    else raise IllegalMove *)
 
 (*
-let legal_moves state = []
 let winner state = None
 let is_game_over state = true
 let current_player state = P1

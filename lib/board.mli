@@ -1,6 +1,7 @@
 type player = P1 | P2
 type piece = { player : player; is_king : bool }
 type t
+
 (* there is no square type; a square is a piece option *)
 
 val size : int
@@ -13,3 +14,4 @@ val get : t -> int -> int -> piece option
 val string_of_square : piece option -> string
 val string_of_board : t -> string
 val opp_player : player -> player
+val piece_coord_set : t -> player -> Utility.CoordSet.t

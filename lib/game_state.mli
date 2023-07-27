@@ -13,3 +13,4 @@ val init :
 
 val is_legal : t -> move -> bool
 val board : t -> Board.t
+val legal_moves : t -> move list
