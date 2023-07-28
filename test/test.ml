@@ -2,6 +2,7 @@ open OUnit2
 open Checkers.Board
 open Checkers.Move
 open Checkers.Game_state
+open Checkers.Utility
 
 let o = None
 let h = Some { player = P1; is_king = false }
@@ -60,21 +61,41 @@ let board_tests =
          ( "piece set p1" >:: fun _ ->
            let lst =
              [
-               [ h; o; o; o; o; o; o; k ];
-               [ o; o; o; o; o; o; o; o ];
-               [ o; o; o; o; o; o; o; o ];
-               [ o; o; o; j; j; o; o; o ];
-               [ o; o; o; j; j; o; o; o ];
-               [ o; o; o; o; o; o; o; o ];
-               [ o; o; o; o; o; o; o; o ];
-               [ k; o; o; o; o; o; o; h ];
+               (*0  1  2  3  4  5  6  7*)
+               [ h; o; o; o; o; o; o; k ] (* 0 *);
+               [ o; o; o; o; o; o; o; o ] (* 1 *);
+               [ o; o; o; o; o; o; o; o ] (* 2 *);
+               [ o; o; o; j; j; o; o; o ] (* 3 *);
+               [ o; o; o; j; j; o; o; o ] (* 4 *);
+               [ o; o; o; o; o; o; o; o ] (* 5 *);
+               [ o; o; o; o; o; o; o; o ] (* 6 *);
+               [ k; o; o; o; o; o; o; h ] (* 7 *);
              ]
            in
-           assert_equal false true (* TODO *) );
+           assert_equal
+             (CoordSet.of_list [ (0, 0); (0, 7); (7, 0); (7, 7) ])
+             (piece_coord_set (of_2d_list lst) P1) );
+         ( "piece set p2" >:: fun _ ->
+           let lst =
+             [
+               (*0  1  2  3  4  5  6  7*)
+               [ h; o; o; o; o; o; o; k ] (* 0 *);
+               [ o; o; o; o; o; o; o; o ] (* 1 *);
+               [ o; o; o; o; o; o; o; o ] (* 2 *);
+               [ o; o; o; j; j; o; o; o ] (* 3 *);
+               [ o; o; o; j; j; o; o; o ] (* 4 *);
+               [ o; o; o; o; o; o; o; o ] (* 5 *);
+               [ o; o; o; o; o; o; o; o ] (* 6 *);
+               [ k; o; o; o; o; o; o; h ] (* 7 *);
+             ]
+           in
+           assert_equal
+             (CoordSet.of_list [ (3, 3); (3, 4); (4, 3); (4, 4) ])
+             (piece_coord_set (of_2d_list lst) P2) );
          ( "immutability basic 1" >:: fun _ ->
            let a, b = (blank, blank) in
            let a1, b1 = (put a 4 1 h, put b 4 1 h) in
-           assert_equal a1 b1 );
+           assert_equal a1 b1 ~printer:string_of_board );
          ( "immutability basic 2" >:: fun _ ->
            let a = put blank 5 3 h in
            let _ = put a 5 3 o in
