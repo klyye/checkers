@@ -52,12 +52,15 @@ let string_of_square x =
 (* TODO: rewrite this so that it prints row and col numbers
    maybe write a fold_lefti? *)
 let string_of_board b =
-  Array.fold_left
-    (fun acc row ->
+  Utility.fold_lefti
+    (fun acc row i ->
       acc
       ^ Array.fold_left (fun acc2 p -> acc2 ^ string_of_square p ^ ", ") "" row
-      ^ "\n")
-    "\n" b
+      ^ " " ^ string_of_int i ^ "\n")
+    "\n 0   1   2   3   4   5   6   7\n" b
 
 let opp_player p = if p = P1 then P2 else P1
-let piece_coord_set board player = Utility.CoordSet.empty (* TODO *)
+
+let piece_coord_set _board _player =
+  (* Array.fold_left (fun _ -> ) Utility.CoordSet.empty board *)
+  Utility.CoordSet.empty
