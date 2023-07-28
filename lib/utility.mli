@@ -51,3 +51,5 @@ module CoordSet : sig
   val add_seq : elt Seq.t -> t -> t
   val of_seq : elt Seq.t -> t
 end
+
+val fold_lefti : ('a -> 'b -> int -> 'a) -> 'a -> 'b array -> 'a

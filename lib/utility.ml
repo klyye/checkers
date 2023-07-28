@@ -8,3 +8,10 @@ module Coord = struct
 end
 
 module CoordSet = Set.Make (Coord)
+
+let fold_lefti f x a =
+  let r = ref x in
+  for i = 0 to Array.length a - 1 do
+    r := f !r a.(i) i
+  done;
+  !r
