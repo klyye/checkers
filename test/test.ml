@@ -74,7 +74,7 @@ let board_tests =
            in
            assert_equal
              (CoordSet.of_list [ (0, 0); (0, 7); (7, 0); (7, 7) ])
-             (piece_coord_set (of_2d_list lst) P1) );
+             (find_pieces (of_2d_list lst) P1) );
          ( "piece set p2" >:: fun _ ->
            let lst =
              [
@@ -91,7 +91,7 @@ let board_tests =
            in
            assert_equal
              (CoordSet.of_list [ (3, 3); (3, 4); (4, 3); (4, 4) ])
-             (piece_coord_set (of_2d_list lst) P2) );
+             (find_pieces (of_2d_list lst) P2) );
          ( "immutability basic 1" >:: fun _ ->
            let a, b = (blank, blank) in
            let a1, b1 = (put a 4 1 h, put b 4 1 h) in
@@ -300,6 +300,7 @@ let teardown_noop _ _ = ()
 let legal_move_tests =
   "test suite for legal moves"
   >::: [
+         (* TODO: rewrite tests (yet again) to check for set of legal moves *)
          ( "legal simple" >:: fun tc ->
            let state = bracket setup_no_capture teardown_noop tc in
            assert_bool "p1 simple move should be legal"

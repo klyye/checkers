@@ -1,5 +1,4 @@
-open Move
-
+open Utility
 (* exception IllegalMove of string *)
 
 type t
@@ -11,6 +10,6 @@ val init :
   unit ->
   t
 
-val is_legal : t -> move -> bool
+val is_legal : t -> Move.t -> bool
 val board : t -> Board.t
-val legal_moves : t -> move list
+val legal_moves : t -> MoveSet.t

@@ -8,6 +8,7 @@ module Coord = struct
 end
 
 module CoordSet = Set.Make (Coord)
+module MoveSet = Set.Make (Move)
 
 let fold_lefti f x a =
   let r = ref x in
