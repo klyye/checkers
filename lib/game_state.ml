@@ -36,10 +36,12 @@ let is_jump_legal state move piece =
   else raise (Invalid_argument "is_jump_legal can only take jump moves")
 
 let is_simple_legal state move piece =
-  let adj_r, adj_c = step move.r move.c move.dir 1 in
-  Option.is_none (get state.board adj_r adj_c)
-  && Option.is_none state.capturing_piece
-  && List.mem move.dir (piece_dirs piece)
+  if not move.is_jump then
+    let adj_r, adj_c = step move.r move.c move.dir 1 in
+    Option.is_none (get state.board adj_r adj_c)
+    && Option.is_none state.capturing_piece
+    && List.mem move.dir (piece_dirs piece)
+  else raise (Invalid_argument "is_simple_legal can only take simple moves")
 
 let movable_piece_coords state =
   let open CoordSet in
@@ -48,7 +50,7 @@ let movable_piece_coords state =
   | None -> find_pieces state.board state.curr_player
 
 let legal_moves state =
-  let legality_check f =
+  let legality_check f is_jump =
     CoordSet.fold
       (fun coord acc ->
         let r, c = coord in
@@ -56,15 +58,15 @@ let legal_moves state =
         (* why tf are the param order swapped for set fold and list fold?? *)
         List.fold_left
           (fun acc2 dir ->
-            let move = { r; c; dir; is_jump = true } in
+            let move = { r; c; dir; is_jump } in
             if f state move piece then MoveSet.add move acc2 else acc2)
           acc (piece_dirs piece))
       (movable_piece_coords state)
       MoveSet.empty
   in
-  let jumps = legality_check is_jump_legal in
+  let jumps = legality_check is_jump_legal true in
   let simples =
-    if MoveSet.is_empty jumps then legality_check is_simple_legal
+    if MoveSet.is_empty jumps then legality_check is_simple_legal false
     else MoveSet.empty
   in
   MoveSet.union jumps simples
