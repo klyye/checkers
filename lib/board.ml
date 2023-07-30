@@ -1,3 +1,5 @@
+open Utility
+
 (* Gotta make my own immutable board type since OCaml doesn't have immutable arrays by default and I don't want to use Jane Street's library *)
 type player = P1 | P2
 type piece = { player : player; is_king : bool }
@@ -52,7 +54,7 @@ let string_of_square x =
 (* TODO: rewrite this so that it prints row and col numbers
    maybe write a fold_lefti? *)
 let string_of_board b =
-  Utility.fold_lefti
+  fold_lefti
     (fun acc row i ->
       acc
       ^ Array.fold_left (fun acc2 p -> acc2 ^ string_of_square p ^ ", ") "" row
@@ -61,6 +63,14 @@ let string_of_board b =
 
 let opp_player p = if p = P1 then P2 else P1
 
-let piece_coord_set _board _player =
-  (* Array.fold_left (fun _ -> ) Utility.CoordSet.empty board *)
-  Utility.CoordSet.empty
+let piece_coord_set board player =
+  let open CoordSet in
+  fold_lefti
+    (fun acc row r ->
+      fold_lefti
+        (fun r_acc elem c ->
+          if Option.is_some elem && (Option.get elem).player = player then
+            add (r, c) r_acc
+          else r_acc)
+        acc row)
+    empty board
