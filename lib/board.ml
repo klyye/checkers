@@ -6,6 +6,7 @@ type piece = { player : player; is_king : bool }
 type t = piece option array array
 
 let size = 8
+let is_oob r c = r < 0 || r >= size || c < 0 || c >= size
 let blank = Array.make_matrix size size None
 
 let start =
@@ -74,3 +75,9 @@ let piece_coord_set board player =
           else r_acc)
         acc row)
     empty board
+
+let is_piece_at board r c player =
+  (not (is_oob r c))
+  &&
+  let piece = get board r c in
+  Option.fold ~none:false ~some:(fun p -> p.player = player) piece

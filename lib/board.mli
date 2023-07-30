@@ -15,3 +15,5 @@ val string_of_square : piece option -> string
 val string_of_board : t -> string
 val opp_player : player -> player
 val piece_coord_set : t -> player -> Utility.CoordSet.t
+val is_oob : int -> int -> bool
+val is_piece_at : t -> int -> int -> player -> bool

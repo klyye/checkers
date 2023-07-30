@@ -7,13 +7,11 @@ type t = {
   board : Board.t;
   curr_player : player;
   capturing_piece : (int * int) option;
-  legal_moves : move list;
       (* TODO: hash map of board states to counts for three move stalemates clause *)
       (* TODO: might be simpler to generate list of legal moves and then just check if user input is contained in that list *)
 }
 
 let board state = state.board
-let is_oob r c = r < 0 || r >= size || c < 0 || c >= size
 let player_dirs = [ (P1, U); (P2, D) ]
 
 let piece_dirs piece =
@@ -23,18 +21,12 @@ let piece_dirs piece =
       let v = List.assoc p player_dirs in
       [ (v, L); (v, R) ]
 
-let is_piece_at state r c player =
-  (not (is_oob r c))
-  &&
-  let piece = get state.board r c in
-  Option.fold ~none:false ~some:(fun p -> p.player = player) piece
-
 let is_jump_legal state r c piece dir =
   let adj_r, adj_c = step r c dir 1 in
   let dest_r, dest_c = step r c dir 2 in
   List.mem dir (piece_dirs piece)
   && (not (is_oob adj_r adj_c))
-  && is_piece_at state adj_r adj_c (opp_player piece.player)
+  && is_piece_at state.board adj_r adj_c (opp_player piece.player)
   && (not (is_oob dest_r dest_c))
   && Option.is_none (get state.board dest_r dest_c)
   && (Option.is_none state.capturing_piece
@@ -45,7 +37,7 @@ let are_jumps_possible state r c piece =
 
 let is_legal state move =
   (* TODO: idea: List.mem move state.legal_moves *)
-  if is_piece_at state move.r move.c state.curr_player then
+  if is_piece_at state.board move.r move.c state.curr_player then
     let piece = Option.get (get state.board move.r move.c) in
     let adj_r, adj_c = step move.r move.c move.dir 1 in
     if move.is_jump then is_jump_legal state move.r move.c piece move.dir
@@ -56,18 +48,14 @@ let is_legal state move =
       && not (are_jumps_possible state move.r move.c piece)
   else false
 
-let generate_legal_moves _board _curr_player _capturing_piece = []
+let legal_moves _state =
+  (* idea: two phases: generate legal jumps, then generate legal simple moves *)
+  []
 
 (* https://stackoverflow.com/questions/1667232/optional-argument-cannot-be-erased *)
 let init ?(board = start) ?(curr_player = P1) ?(capturing_piece = None) () =
-  {
-    board;
-    curr_player;
-    capturing_piece;
-    legal_moves = generate_legal_moves board curr_player capturing_piece;
-  }
+  { board; curr_player; capturing_piece }
 
-let legal_moves state = state.legal_moves
 (* let make_move state move =
    if is_legal state move then
      let src, dest = move in
