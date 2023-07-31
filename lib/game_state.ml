@@ -130,9 +130,11 @@ let string_of_state state =
         let r, c = coord in
         "(" ^ string_of_int r ^ ", " ^ string_of_int c ^ ")")
       state.capturing_piece
+  ^ "\n"
 
-(*
-let winner state = None
-let is_game_over state = true
-let current_player state = P1
-let to_string state = "" *)
+let winner state =
+  if MoveSet.is_empty (legal_moves state) then
+    Some (opp_player state.curr_player)
+  else None
+
+let current_player state = state.curr_player
