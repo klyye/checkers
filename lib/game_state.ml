@@ -77,8 +77,44 @@ let is_legal state move = MoveSet.mem move (legal_moves state)
 let init ?(board = start) ?(curr_player = P1) ?(capturing_piece = None) () =
   { board; curr_player; capturing_piece }
 
+let is_promoted piece row =
+  (not piece.is_king)
+  && ((piece.player = P1 && row = 0) || (piece.player = P2 && row = size - 1))
+
 let make_move state move =
-  if is_legal state move then state else raise IllegalMove
+  if is_legal state move then
+    let piece = Option.get (get state.board move.r move.c) in
+    let adj_r, adj_c = step move.r move.c move.dir 1 in
+    let jump_r, jump_c = step move.r move.c move.dir 2 in
+    let removed = put state.board move.r move.c None in
+    if move.is_jump then
+      let promoted_piece =
+        { piece with is_king = piece.is_king || is_promoted piece jump_r }
+      in
+      let captured = put removed adj_r adj_c None in
+      let placed = put captured jump_r jump_c (Some promoted_piece) in
+      let _jumps_possible =
+        List.exists
+          (fun _dir ->
+            (*TODO: resolve issues with capturing piece in jump legality check
+               idea: before checking legality, but after performing capture and jump,
+               create post-capture state with capturing piece as this piece, then do
+               legality check, then resolve capturing piece field based on legality check *)
+            false)
+          (piece_dirs piece)
+      in
+      { board = placed; curr_player = P1; capturing_piece = None }
+    else
+      let promoted_piece =
+        { piece with is_king = piece.is_king || is_promoted piece adj_r }
+      in
+      let placed = put removed adj_r adj_c (Some promoted_piece) in
+      {
+        board = placed;
+        curr_player = opp_player state.curr_player;
+        capturing_piece = None;
+      }
+  else raise IllegalMove
 
 (*
 let winner state = None
