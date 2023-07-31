@@ -93,17 +93,25 @@ let make_move state move =
       in
       let captured = put removed adj_r adj_c None in
       let placed = put captured jump_r jump_c (Some promoted_piece) in
-      let _jumps_possible =
-        List.exists
-          (fun _dir ->
-            (*TODO: resolve issues with capturing piece in jump legality check
-               idea: before checking legality, but after performing capture and jump,
-               create post-capture state with capturing piece as this piece, then do
-               legality check, then resolve capturing piece field based on legality check *)
-            false)
-          (piece_dirs piece)
+      let post_jump_state =
+        {
+          board = placed;
+          curr_player = piece.player;
+          capturing_piece = Some (jump_r, jump_c);
+        }
       in
-      { board = placed; curr_player = P1; capturing_piece = None }
+      (*TODO: resolve issues with capturing piece in jump legality check
+         idea: before checking legality, but after performing capture and jump,
+         create post-capture state with capturing piece as this piece, then do
+         legality check, then resolve capturing piece field based on legality check *)
+      let jumps_possible = legal_moves post_jump_state in
+      if is_promoted piece jump_r || MoveSet.is_empty jumps_possible then
+        {
+          board = placed;
+          curr_player = opp_player piece.player;
+          capturing_piece = None;
+        }
+      else post_jump_state
     else
       let promoted_piece =
         { piece with is_king = piece.is_king || is_promoted piece adj_r }
@@ -115,6 +123,17 @@ let make_move state move =
         capturing_piece = None;
       }
   else raise IllegalMove
+
+let string_of_state state =
+  string_of_board state.board
+  ^ "\nplayer: "
+  ^ (if state.curr_player = P1 then "P1" else "P2")
+  ^ "\ncapturing piece: "
+  ^ Option.fold ~none:"None"
+      ~some:(fun coord ->
+        let r, c = coord in
+        "(" ^ string_of_int r ^ ", " ^ string_of_int c ^ ")")
+      state.capturing_piece
 
 (*
 let winner state = None

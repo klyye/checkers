@@ -419,7 +419,7 @@ let make_move_tests =
          );
          ( "simple 1" >:: fun tc ->
            let state = bracket setup_king_no_capture teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [
@@ -443,7 +443,7 @@ let make_move_tests =
                 ]) );
          ( "multijump 1" >:: fun tc ->
            let state = bracket setup_capture teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [
@@ -466,7 +466,7 @@ let make_move_tests =
                 ]) );
          ( "multijump 2" >:: fun tc ->
            let state = bracket setup_capture teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [
@@ -489,7 +489,7 @@ let make_move_tests =
                 ]) );
          ( "branching multijump 2" >:: fun tc ->
            let state = bracket setup_single_and_multijump teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [
@@ -512,7 +512,7 @@ let make_move_tests =
                 ]) );
          ( "branching multijump 2" >:: fun tc ->
            let state = bracket setup_single_and_multijump teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [
@@ -536,7 +536,7 @@ let make_move_tests =
                 ]) );
          ( "diamond left path" >:: fun tc ->
            let state = bracket setup_diamond teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [
@@ -559,7 +559,7 @@ let make_move_tests =
                 ]) );
          ( "diamond right path" >:: fun tc ->
            let state = bracket setup_diamond teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [
@@ -582,7 +582,7 @@ let make_move_tests =
                 ]) );
          ( "king multi jump" >:: fun tc ->
            let state = bracket setup_king_capture teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [
@@ -616,7 +616,7 @@ let make_move_tests =
                  ]) );
          ( "king cycle legal" >:: fun tc ->
            let state = bracket setup_king_cycle teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [
@@ -641,7 +641,7 @@ let make_move_tests =
                 ]) );
          ( "promotion" >:: fun tc ->
            let state = bracket setup_king_edge teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [
@@ -669,7 +669,7 @@ let make_move_tests =
                  ]) );
          ( "promotion ends turn 2" >:: fun tc ->
            let state = bracket setup_king_edge teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [
@@ -692,7 +692,7 @@ let make_move_tests =
                 ]) );
          ( "king does not promote" >:: fun tc ->
            let state = bracket setup_king_edge teardown_noop tc in
-           assert_equal
+           assert_equal ~printer:string_of_state
              (let b =
                 of_2d_list
                   [

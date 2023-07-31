@@ -15,3 +15,4 @@ val is_legal : t -> Move.t -> bool
 val board : t -> Board.t
 val legal_moves : t -> MoveSet.t
 val make_move : t -> Move.t -> t
+val string_of_state : t -> string
