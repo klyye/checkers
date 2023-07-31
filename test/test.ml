@@ -192,8 +192,7 @@ let setup_single_and_multijump _test_ctxt =
   in
   init ~board:b ()
 
-(* TODO: after make_move api is defined, write test to make sure that going left and right result in different boards in the diamond *)
-let _setup_diamond _test_ctxt =
+let setup_diamond _test_ctxt =
   let b =
     of_2d_list
       [
@@ -244,7 +243,7 @@ let setup_king_capture _test_ctxt =
   in
   init ~board:b ()
 
-let _setup_king_cycle _test_ctxt =
+let setup_king_cycle _test_ctxt =
   let b =
     of_2d_list
       [
@@ -261,7 +260,7 @@ let _setup_king_cycle _test_ctxt =
   in
   init ~board:b ()
 
-let _setup_king_edge _test_ctxt =
+let setup_king_edge _test_ctxt =
   let b =
     of_2d_list
       [
@@ -400,82 +399,322 @@ let legal_move_tests =
            assert_bool "cannot simple move after jumping"
              (not
                 (is_legal state { r = 4; c = 3; dir = (U, L); is_jump = false }))
-         )
-         (* ( "legal multijump 1" >:: fun tc ->
-              let state = bracket setup_capture teardown_noop tc in
-              assert_bool "multijump (U, R) (U, L) must be legal"
-                (is_legal state
-                   { r = 5; c = 3; dir = (U, R); kind = Jump [ (U, L) ] }) );
-            ( "legal multijump 2" >:: fun tc ->
-              let state = bracket setup_capture teardown_noop tc in
-              assert_bool "multijump (U, R) (U, R) must be legal"
-                (is_legal state
-                   { r = 5; c = 3; dir = (U, R); kind = Jump [ (U, R) ] }) );
-            ( "legal branching multijump 2" >:: fun tc ->
-              let state = bracket setup_single_and_multijump teardown_noop tc in
-              assert_bool "legal to choose double jump over triple jump"
-                (is_legal state
-                   { r = 7; c = 2; dir = (U, R); kind = Jump [ (U, L) ] }) );
-            ( "legal branching multijump 3" >:: fun tc ->
-              let state = bracket setup_single_and_multijump teardown_noop tc in
-              assert_bool "legal to choose triple jump"
-                (is_legal state
-                   { r = 7; c = 2; dir = (U, R); kind = Jump [ (U, R); (U, L) ] })
-            );
-            ( "legal diamond 1" >:: fun tc ->
-              let state = bracket setup_diamond teardown_noop tc in
-              assert_bool "diamond left path"
-                (is_legal state
-                   { r = 6; c = 3; dir = (U, L); kind = Jump [ (U, R) ] }) );
-            ( "legal diamond 2" >:: fun tc ->
-              let state = bracket setup_diamond teardown_noop tc in
-              assert_bool "diamond right path"
-                (is_legal state
-                   { r = 6; c = 3; dir = (U, R); kind = Jump [ (U, L) ] }) );
-            ( "legal king multi jump" >:: fun tc ->
-              let state = bracket setup_king_capture teardown_noop tc in
-              assert_bool "king can multijump backwards"
-                (is_legal state
-                   { r = 2; c = 3; dir = (D, R); kind = Jump [ (D, L) ] }) );
-            ( "king cycle illegal" >:: fun tc ->
-              let state = bracket setup_king_cycle teardown_noop tc in
-              assert_bool "king should not be able to recapture captured piece"
-                (not
-                   (is_legal state
-                      {
-                        r = 2;
-                        c = 3;
-                        dir = (D, R);
-                        kind = Jump [ (D, L); (U, L); (U, R); (D, R) ];
-                      })) );
-            ( "king cycle legal" >:: fun tc ->
-              let state = bracket setup_king_cycle teardown_noop tc in
-              assert_bool "king should be able to jump in a circle"
-                (is_legal state
-                   {
-                     r = 2;
-                     c = 3;
-                     dir = (D, R);
-                     kind = Jump [ (D, L); (U, L); (U, R) ];
-                   }) );
-            ( "promotion ends turn" >:: fun tc ->
-              let state = bracket setup_king_edge teardown_noop tc in
-              assert_bool "should not be forced to jump after promotion"
-                (not
-                   (is_legal state
-                      {
-                        r = 2;
-                        c = 0;
-                        dir = (U, R);
-                        kind = Jump [ (D, R); (U, R) ];
-                      })) );
-            ( "king does not promote" >:: fun tc ->
-              let state = bracket setup_king_edge teardown_noop tc in
-              assert_bool "king forced to jump on and off final row"
-                (is_legal state
-                   { r = 2; c = 2; dir = (U, R); kind = Jump [ (D, R) ] }) ); *);
+         );
        ]
-(* TODO: write test cases for remaining numbers *)
+
+let make_moves state moves = List.fold_left make_move state moves
+
+let make_move_tests =
+  "test suite for make move"
+  >::: [
+         ( "illegal simple" >:: fun tc ->
+           let state = bracket setup_king_no_capture teardown_noop tc in
+           assert_raises IllegalMove (fun () ->
+               make_move state { r = 6; c = 2; dir = (D, R); is_jump = false })
+         );
+         ( "illegal jump" >:: fun tc ->
+           let state = bracket setup_king_no_capture teardown_noop tc in
+           assert_raises IllegalMove (fun () ->
+               make_move state { r = 6; c = 2; dir = (D, L); is_jump = true })
+         );
+         ( "simple 1" >:: fun tc ->
+           let state = bracket setup_king_no_capture teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; o; o; o; o; o ] (* 1 *);
+                    [ o; o; o; o; o; o; o; o ] (* 2 *);
+                    [ o; o; k; o; o; o; o; o ] (* 3 *);
+                    [ o; o; o; o; o; o; o; o ] (* 4 *);
+                    [ o; h; o; o; o; o; o; o ] (* 5 *);
+                    [ o; o; o; o; o; j; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [
+                  { r = 6; c = 2; dir = (U, L); is_jump = false };
+                  { r = 5; c = 4; dir = (D, R); is_jump = false };
+                  { r = 2; c = 3; dir = (D, L); is_jump = false };
+                ]) );
+         ( "multijump 1" >:: fun tc ->
+           let state = bracket setup_capture teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; h; o; o; o; o ] (* 1 *);
+                    [ o; o; o; o; o; o; j; j ] (* 2 *);
+                    [ o; o; o; o; o; o; h; o ] (* 3 *);
+                    [ o; o; o; o; o; o; o; o ] (* 4 *);
+                    [ o; o; o; o; o; o; o; o ] (* 5 *);
+                    [ o; o; j; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [
+                  { r = 5; c = 3; dir = (U, R); is_jump = true };
+                  { r = 3; c = 5; dir = (U, L); is_jump = true };
+                ]) );
+         ( "multijump 2" >:: fun tc ->
+           let state = bracket setup_capture teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; o; o; o; o; h ] (* 1 *);
+                    [ o; o; o; o; j; o; o; j ] (* 2 *);
+                    [ o; o; o; o; o; o; h; o ] (* 3 *);
+                    [ o; o; o; o; o; o; o; o ] (* 4 *);
+                    [ o; o; o; o; o; o; o; o ] (* 5 *);
+                    [ o; o; j; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [
+                  { r = 5; c = 3; dir = (U, R); is_jump = true };
+                  { r = 3; c = 5; dir = (U, R); is_jump = true };
+                ]) );
+         ( "branching multijump 2" >:: fun tc ->
+           let state = bracket setup_single_and_multijump teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; o; o; o; o; o ] (* 1 *);
+                    [ o; o; o; o; o; j; o; o ] (* 2 *);
+                    [ o; o; h; o; o; o; o; o ] (* 3 *);
+                    [ o; o; o; o; o; j; o; o ] (* 4 *);
+                    [ o; o; o; o; o; o; o; o ] (* 5 *);
+                    [ o; j; o; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [
+                  { r = 7; c = 2; dir = (U, R); is_jump = true };
+                  { r = 5; c = 4; dir = (U, L); is_jump = true };
+                ]) );
+         ( "branching multijump 2" >:: fun tc ->
+           let state = bracket setup_single_and_multijump teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; o; h; o; o; o ] (* 1 *);
+                    [ o; o; o; o; o; o; o; o ] (* 2 *);
+                    [ o; o; o; o; o; o; o; o ] (* 3 *);
+                    [ o; o; o; j; o; o; o; o ] (* 4 *);
+                    [ o; o; o; o; o; o; o; o ] (* 5 *);
+                    [ o; j; o; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [
+                  { r = 7; c = 2; dir = (U, R); is_jump = true };
+                  { r = 5; c = 4; dir = (U, R); is_jump = true };
+                  { r = 3; c = 6; dir = (U, R); is_jump = true };
+                ]) );
+         ( "diamond left path" >:: fun tc ->
+           let state = bracket setup_diamond teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; o; o; o; o; o ] (* 1 *);
+                    [ o; o; o; h; o; o; o; o ] (* 2 *);
+                    [ o; o; o; o; j; o; o; o ] (* 3 *);
+                    [ o; o; o; o; o; o; o; o ] (* 4 *);
+                    [ o; o; o; o; j; o; o; o ] (* 5 *);
+                    [ o; o; o; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [
+                  { r = 6; c = 3; dir = (U, L); is_jump = true };
+                  { r = 6; c = 3; dir = (U, R); is_jump = true };
+                ]) );
+         ( "diamond right path" >:: fun tc ->
+           let state = bracket setup_diamond teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; o; o; o; o; o ] (* 1 *);
+                    [ o; o; o; h; o; o; o; o ] (* 2 *);
+                    [ o; o; j; o; o; o; o; o ] (* 3 *);
+                    [ o; o; o; o; o; o; o; o ] (* 4 *);
+                    [ o; o; j; o; o; o; o; o ] (* 5 *);
+                    [ o; o; o; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [
+                  { r = 6; c = 3; dir = (U, R); is_jump = true };
+                  { r = 6; c = 3; dir = (U, L); is_jump = true };
+                ]) );
+         ( "king multi jump" >:: fun tc ->
+           let state = bracket setup_king_capture teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; o; o; o; o; o ] (* 1 *);
+                    [ o; o; o; o; o; o; o; o ] (* 2 *);
+                    [ o; o; j; o; o; o; o; o ] (* 3 *);
+                    [ o; o; o; o; o; o; o; o ] (* 4 *);
+                    [ o; o; o; o; o; o; o; o ] (* 5 *);
+                    [ o; o; o; k; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [
+                  { r = 2; c = 3; dir = (D, R); is_jump = true };
+                  { r = 6; c = 3; dir = (D, L); is_jump = true };
+                ]) );
+         ( "king cycle illegal" >:: fun tc ->
+           let state = bracket setup_king_cycle teardown_noop tc in
+           assert_raises IllegalMove (fun () ->
+               make_moves state
+                 [
+                   { r = 2; c = 3; dir = (D, R); is_jump = true };
+                   { r = 2; c = 3; dir = (D, L); is_jump = true };
+                   { r = 2; c = 3; dir = (U, L); is_jump = true };
+                   { r = 2; c = 3; dir = (U, R); is_jump = true };
+                   { r = 2; c = 3; dir = (D, R); is_jump = true };
+                 ]) );
+         ( "king cycle legal" >:: fun tc ->
+           let state = bracket setup_king_cycle teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; o; o; o; o; o ] (* 1 *);
+                    [ o; o; o; k; o; o; o; o ] (* 2 *);
+                    [ o; o; o; o; o; o; o; o ] (* 3 *);
+                    [ o; o; o; o; o; o; o; o ] (* 4 *);
+                    [ o; o; o; o; o; o; o; o ] (* 5 *);
+                    [ o; o; o; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [
+                  { r = 2; c = 3; dir = (D, R); is_jump = true };
+                  { r = 2; c = 3; dir = (D, L); is_jump = true };
+                  { r = 2; c = 3; dir = (U, L); is_jump = true };
+                  { r = 2; c = 3; dir = (U, R); is_jump = true };
+                ]) );
+         ( "promotion" >:: fun tc ->
+           let state = bracket setup_king_edge teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; k; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; j; o; j; o; o ] (* 1 *);
+                    [ o; o; k; o; o; o; o; o ] (* 2 *);
+                    [ o; o; o; o; o; o; o; o ] (* 3 *);
+                    [ o; o; o; o; o; o; o; o ] (* 4 *);
+                    [ o; o; o; o; o; o; o; o ] (* 5 *);
+                    [ o; o; o; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [ { r = 2; c = 0; dir = (U, R); is_jump = true } ]) );
+         ( "promotion ends turn 1" >:: fun tc ->
+           let state = bracket setup_king_edge teardown_noop tc in
+           assert_raises IllegalMove (fun () ->
+               make_moves state
+                 [
+                   { r = 2; c = 0; dir = (U, R); is_jump = true };
+                   { r = 0; c = 2; dir = (D, R); is_jump = true };
+                 ]) );
+         ( "promotion ends turn 2" >:: fun tc ->
+           let state = bracket setup_king_edge teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; k; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; o; o; j; o; o ] (* 1 *);
+                    [ o; o; o; o; o; o; o; o ] (* 2 *);
+                    [ o; j; o; o; o; o; o; o ] (* 3 *);
+                    [ o; o; o; o; o; o; o; o ] (* 4 *);
+                    [ o; o; o; o; o; o; o; o ] (* 5 *);
+                    [ o; o; o; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [
+                  { r = 2; c = 0; dir = (U, R); is_jump = true };
+                  { r = 1; c = 3; dir = (D, L); is_jump = true };
+                ]) );
+         ( "king does not promote" >:: fun tc ->
+           let state = bracket setup_king_edge teardown_noop tc in
+           assert_equal
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; j; o; o; o; o; o; o ] (* 1 *);
+                    [ h; o; o; o; o; o; k; o ] (* 2 *);
+                    [ o; o; o; o; o; o; o; o ] (* 3 *);
+                    [ o; o; o; o; o; o; o; o ] (* 4 *);
+                    [ o; o; o; o; o; o; o; o ] (* 5 *);
+                    [ o; o; o; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ())
+             (make_moves state
+                [
+                  { r = 2; c = 2; dir = (U, R); is_jump = true };
+                  { r = 0; c = 4; dir = (D, R); is_jump = true };
+                ]) );
+       ]
 
 let _ = run_test_tt_main board_tests
 let _ = run_test_tt_main legal_move_tests
+let _ = run_test_tt_main make_move_tests

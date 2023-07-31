@@ -2,7 +2,7 @@ open Board
 open Move
 open Utility
 
-(* exception IllegalMove of string *)
+exception IllegalMove
 
 type t = {
   board : Board.t;
@@ -77,13 +77,8 @@ let is_legal state move = MoveSet.mem move (legal_moves state)
 let init ?(board = start) ?(curr_player = P1) ?(capturing_piece = None) () =
   { board; curr_player; capturing_piece }
 
-(* let make_move state move =
-   if is_legal state move then
-     let src, dest = move in
-     let r0, c0 = src in
-     let r1, c1 = dest in
-     state
-   else raise IllegalMove *)
+let make_move state move =
+  if is_legal state move then state else raise IllegalMove
 
 (*
 let winner state = None
