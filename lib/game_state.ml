@@ -9,7 +9,6 @@ type t = {
   curr_player : player;
   capturing_piece : (int * int) option;
       (* TODO: hash map of board states to counts for three move stalemates clause *)
-      (* TODO: might be simpler to generate list of legal moves and then just check if user input is contained in that list *)
 }
 
 let board state = state.board
@@ -75,7 +74,7 @@ let legal_moves state =
 let is_legal state move = MoveSet.mem move (legal_moves state)
 
 (* https://stackoverflow.com/questions/1667232/optional-argument-cannot-be-erased *)
-let init ?(board = start) ?(curr_player = P1) ?(capturing_piece = None) () =
+let init board ?(capturing_piece = None) curr_player =
   { board; curr_player; capturing_piece }
 
 let is_promoted piece row =
@@ -101,10 +100,6 @@ let make_move state move =
           capturing_piece = Some (jump_r, jump_c);
         }
       in
-      (*TODO: resolve issues with capturing piece in jump legality check
-         idea: before checking legality, but after performing capture and jump,
-         create post-capture state with capturing piece as this piece, then do
-         legality check, then resolve capturing piece field based on legality check *)
       let jumps_possible = legal_moves post_jump_state in
       if is_promoted piece jump_r || MoveSet.is_empty jumps_possible then
         {
