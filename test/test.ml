@@ -434,12 +434,55 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P2 ())
              (make_moves state
                 [
                   { r = 6; c = 2; dir = (U, L); is_jump = false };
                   { r = 5; c = 4; dir = (D, R); is_jump = false };
                   { r = 2; c = 3; dir = (D, L); is_jump = false };
+                ]) );
+         ( "mid jump 1" >:: fun tc ->
+           let state = bracket setup_single_and_multijump teardown_noop tc in
+           assert_equal ~printer:string_of_state
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; o; o; o; o; o ] (* 1 *);
+                    [ o; o; o; o; o; j; o; o ] (* 2 *);
+                    [ o; o; o; o; o; o; o; o ] (* 3 *);
+                    [ o; o; o; j; o; j; o; o ] (* 4 *);
+                    [ o; o; o; o; h; o; o; o ] (* 5 *);
+                    [ o; j; o; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ~curr_player:P1 ~capturing_piece:(Some (5, 4)) ())
+             (make_moves state
+                [ { r = 7; c = 2; dir = (U, R); is_jump = true } ]) );
+         ( "mid jump 2" >:: fun tc ->
+           let state = bracket setup_single_and_multijump teardown_noop tc in
+           assert_equal ~printer:string_of_state
+             (let b =
+                of_2d_list
+                  [
+                    (*0  1  2  3  4  5  6  7*)
+                    [ o; o; o; o; o; o; o; o ] (* 0 *);
+                    [ o; o; o; o; o; o; o; o ] (* 1 *);
+                    [ o; o; o; o; o; j; o; o ] (* 2 *);
+                    [ o; o; o; o; o; o; h; o ] (* 3 *);
+                    [ o; o; o; j; o; o; o; o ] (* 4 *);
+                    [ o; o; o; o; o; o; o; o ] (* 5 *);
+                    [ o; j; o; o; o; o; o; o ] (* 6 *);
+                    [ o; o; o; o; o; o; o; o ] (* 7 *);
+                  ]
+              in
+              init ~board:b ~curr_player:P1 ~capturing_piece:(Some (3, 6)) ())
+             (make_moves state
+                [
+                  { r = 7; c = 2; dir = (U, R); is_jump = true };
+                  { r = 5; c = 4; dir = (U, R); is_jump = true };
                 ]) );
          ( "multijump 1" >:: fun tc ->
            let state = bracket setup_capture teardown_noop tc in
@@ -458,7 +501,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P2 ())
              (make_moves state
                 [
                   { r = 5; c = 3; dir = (U, R); is_jump = true };
@@ -481,7 +524,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P2 ())
              (make_moves state
                 [
                   { r = 5; c = 3; dir = (U, R); is_jump = true };
@@ -504,7 +547,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P2 ())
              (make_moves state
                 [
                   { r = 7; c = 2; dir = (U, R); is_jump = true };
@@ -527,12 +570,12 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P2 ())
              (make_moves state
                 [
                   { r = 7; c = 2; dir = (U, R); is_jump = true };
                   { r = 5; c = 4; dir = (U, R); is_jump = true };
-                  { r = 3; c = 6; dir = (U, R); is_jump = true };
+                  { r = 3; c = 6; dir = (U, L); is_jump = true };
                 ]) );
          ( "diamond left path" >:: fun tc ->
            let state = bracket setup_diamond teardown_noop tc in
@@ -551,7 +594,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P2 ())
              (make_moves state
                 [
                   { r = 6; c = 3; dir = (U, L); is_jump = true };
@@ -574,7 +617,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P2 ())
              (make_moves state
                 [
                   { r = 6; c = 3; dir = (U, R); is_jump = true };
@@ -597,7 +640,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P2 ())
              (make_moves state
                 [
                   { r = 2; c = 3; dir = (D, R); is_jump = true };
@@ -631,7 +674,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P2 ())
              (make_moves state
                 [
                   { r = 2; c = 3; dir = (D, R); is_jump = true };
@@ -656,7 +699,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P2 ())
              (make_moves state
                 [ { r = 2; c = 0; dir = (U, R); is_jump = true } ]) );
          ( "promotion ends turn 1" >:: fun tc ->
@@ -684,7 +727,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P1 ())
              (make_moves state
                 [
                   { r = 2; c = 0; dir = (U, R); is_jump = true };
@@ -707,7 +750,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init ~board:b ())
+              init ~board:b ~curr_player:P2 ())
              (make_moves state
                 [
                   { r = 2; c = 2; dir = (U, R); is_jump = true };
