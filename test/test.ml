@@ -598,7 +598,7 @@ let make_move_tests =
              (make_moves state
                 [
                   { r = 6; c = 3; dir = (U, L); is_jump = true };
-                  { r = 6; c = 3; dir = (U, R); is_jump = true };
+                  { r = 4; c = 1; dir = (U, R); is_jump = true };
                 ]) );
          ( "diamond right path" >:: fun tc ->
            let state = bracket setup_diamond teardown_noop tc in
@@ -621,7 +621,7 @@ let make_move_tests =
              (make_moves state
                 [
                   { r = 6; c = 3; dir = (U, R); is_jump = true };
-                  { r = 6; c = 3; dir = (U, L); is_jump = true };
+                  { r = 4; c = 5; dir = (U, L); is_jump = true };
                 ]) );
          ( "king multi jump" >:: fun tc ->
            let state = bracket setup_king_capture teardown_noop tc in
@@ -644,7 +644,7 @@ let make_move_tests =
              (make_moves state
                 [
                   { r = 2; c = 3; dir = (D, R); is_jump = true };
-                  { r = 6; c = 3; dir = (D, L); is_jump = true };
+                  { r = 4; c = 5; dir = (D, L); is_jump = true };
                 ]) );
          ( "king cycle illegal" >:: fun tc ->
            let state = bracket setup_king_cycle teardown_noop tc in
@@ -652,9 +652,9 @@ let make_move_tests =
                make_moves state
                  [
                    { r = 2; c = 3; dir = (D, R); is_jump = true };
-                   { r = 2; c = 3; dir = (D, L); is_jump = true };
-                   { r = 2; c = 3; dir = (U, L); is_jump = true };
-                   { r = 2; c = 3; dir = (U, R); is_jump = true };
+                   { r = 4; c = 5; dir = (D, L); is_jump = true };
+                   { r = 6; c = 3; dir = (U, L); is_jump = true };
+                   { r = 4; c = 1; dir = (U, R); is_jump = true };
                    { r = 2; c = 3; dir = (D, R); is_jump = true };
                  ]) );
          ( "king cycle legal" >:: fun tc ->
@@ -678,9 +678,9 @@ let make_move_tests =
              (make_moves state
                 [
                   { r = 2; c = 3; dir = (D, R); is_jump = true };
-                  { r = 2; c = 3; dir = (D, L); is_jump = true };
-                  { r = 2; c = 3; dir = (U, L); is_jump = true };
-                  { r = 2; c = 3; dir = (U, R); is_jump = true };
+                  { r = 4; c = 5; dir = (D, L); is_jump = true };
+                  { r = 6; c = 3; dir = (U, L); is_jump = true };
+                  { r = 4; c = 1; dir = (U, R); is_jump = true };
                 ]) );
          ( "promotion" >:: fun tc ->
            let state = bracket setup_king_edge teardown_noop tc in
