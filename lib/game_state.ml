@@ -124,16 +124,17 @@ let make_move state move =
   else raise IllegalMove
 
 let string_of_state state =
-  string_of_board state.board
-  ^ "\nplayer: "
-  ^ (if state.curr_player = P1 then "P1" else "P2")
-  ^ "\ncapturing piece: "
-  ^ Option.fold ~none:"None"
+  let board_str = string_of_board state.board in
+  let player_str = if state.curr_player = P1 then "P1" else "P2" in
+  let capturing_str =
+    Option.fold ~none:"None"
       ~some:(fun coord ->
         let r, c = coord in
         "(" ^ string_of_int r ^ ", " ^ string_of_int c ^ ")")
       state.capturing_piece
-  ^ "\n"
+  in
+  Printf.sprintf "%s\nplayer: %s\ncapturing piece: %s\nturn: %d\n" board_str
+    player_str capturing_str state.turn_count
 
 let winner state =
   if MoveSet.is_empty (legal_moves state) then
