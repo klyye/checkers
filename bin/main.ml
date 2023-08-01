@@ -47,7 +47,10 @@ let rec game_loop state =
     let () = printf "%s" (string_of_state state) in
     let () = printf "Enter: Row Column U/D L/R J/S\n" in
     let () = printf "Type \"help\" for input help" in
-    let move = input_loop () in
+    let move =
+      if current_player state = P1 then input_loop ()
+      else Minimax.find_move state
+    in
     (game_loop [@tailcall])
       (try make_move state move
        with IllegalMove ->

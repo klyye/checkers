@@ -17,3 +17,4 @@ val opp_player : player -> player
 val find_pieces : t -> player -> Utility.CoordSet.t
 val is_oob : int -> int -> bool
 val is_piece_at : t -> int -> int -> player -> bool
+val piece_list : t -> piece list

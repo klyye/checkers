@@ -81,3 +81,11 @@ let is_piece_at board r c player =
   &&
   let piece = get board r c in
   Option.fold ~none:false ~some:(fun p -> p.player = player) piece
+
+let piece_list board =
+  Array.fold_left
+    (fun acc row ->
+      Array.fold_left
+        (fun acc2 elem -> match elem with Some p -> p :: acc2 | None -> acc2)
+        acc row)
+    [] board
