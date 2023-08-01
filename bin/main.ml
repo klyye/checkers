@@ -41,12 +41,13 @@ let rec input_loop () =
 
 let rec game_loop state =
   let open Game_state in
-  let () = printf "%s" (string_of_state state) in
-  let () = printf "Enter: Row Column U/D L/R J/S\n" in
-  let () = printf "Type \"help\" for input help" in
-  let move = input_loop () in
-  if Option.is_some (winner state) then printf "you win"
+  if Option.is_some (winner state) then
+    printf "%s wins!!!\n" (if winner state = Some P1 then "P1" else "P2")
   else
+    let () = printf "%s" (string_of_state state) in
+    let () = printf "Enter: Row Column U/D L/R J/S\n" in
+    let () = printf "Type \"help\" for input help" in
+    let move = input_loop () in
     (game_loop [@tailcall])
       (try make_move state move
        with IllegalMove ->
