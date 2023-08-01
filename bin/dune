@@ -2,3 +2,10 @@
  (public_name checkers)
  (name main)
  (libraries checkers))
+
+(env
+ (release ;; <- notice the change here
+  (flags
+   (:standard -w -50-32-27-9-69-34-37-33))
+  (ocamlopt_flags
+   (:standard -unsafe -noassert -inline 100))))

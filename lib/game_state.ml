@@ -23,7 +23,7 @@ let piece_dirs = function
 let is_jump_legal state move piece =
   if move.is_jump then
     let adj_r, adj_c = step move.r move.c move.dir 1 in
-    let dest_r, dest_c = step move.r move.c move.dir 2 in
+    let dest_r, dest_c = dest move in
     List.mem move.dir (piece_dirs piece)
     && (not (is_oob adj_r adj_c))
     && is_piece_at state.board adj_r adj_c (opp_player piece.player)
@@ -35,7 +35,7 @@ let is_jump_legal state move piece =
 
 let is_simple_legal state move piece =
   if not move.is_jump then
-    let adj_r, adj_c = step move.r move.c move.dir 1 in
+    let adj_r, adj_c = dest move in
     (not (is_oob adj_r adj_c))
     && Option.is_none (get state.board adj_r adj_c)
     && Option.is_none state.capturing_piece

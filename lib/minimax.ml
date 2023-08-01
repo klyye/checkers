@@ -1,28 +1,30 @@
 open Game_state
 open Utility
 
-let search_depth = 9
+let search_depth = 25
 
+(* TODO: add turn counter for openings, add "king only" phase *)
 let heuristic state =
   let open Board in
   match winner state with
   | Some P1 -> max_int
   | Some P2 -> min_int
   | None ->
-      (let piece_list = Board.piece_list (board state) in
-       List.fold_left
-         (fun acc piece ->
-           acc
-           + (if piece.is_king then 175 else 75)
-             * if piece.player = P1 then 1 else -1)
-         0 piece_list)
-      +
-      let coordset = Board.find_pieces (board state) (current_player state) in
+      let curr_player = current_player state in
+      let board = board state in
+      let coordset =
+        CoordSet.union
+          (Board.find_pieces board curr_player)
+          (Board.find_pieces board (opp_player curr_player))
+      in
       CoordSet.fold
-        (fun coord acc ->
+        (fun coord score ->
           let r, c = coord in
-          let piece = Option.get (Board.get (board state) r c) in
-          if piece.is_king then acc else acc - r)
+          let piece = Option.get (Board.get board r c) in
+          let home_row = if piece.player = P1 then 7 else 0 in
+          let polarity = if piece.player = P1 then 1 else -1 in
+          (polarity * if piece.is_king then 200 else 15 * abs (r - home_row))
+          + score)
         coordset 0
 
 (* https://www.youtube.com/watch?v=l-hh51ncgDI *)
@@ -55,10 +57,12 @@ let find_move state =
         let child = make_move state move in
         let eval = minimax child search_depth min_int max_int in
         if extrema eval max_eval > 0 then
-          let () = Printf.printf "Eval: %d" eval in
+          let () =
+            Printf.printf "\nEval: %d %s" eval (Move.string_of_move move)
+          in
           (eval, move)
         else move_and_eval)
       moves
-      (start, MoveSet.choose moves)
+      (start, MoveSet.min_elt moves)
   in
   move
