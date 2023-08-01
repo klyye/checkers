@@ -24,7 +24,7 @@ let rec input_loop () =
   let processed_line = line |> String.uppercase_ascii |> String.trim in
   if processed_line = "HELP" then
     let () = print_help () in
-    (input_loop () [@tailcall])
+    (input_loop [@tailcall]) ()
   else
     let split_line =
       List.filter
@@ -34,10 +34,10 @@ let rec input_loop () =
     try parse_move split_line with
     | Invalid_argument s ->
         let () = printf "%s\n" s in
-        (input_loop () [@tailcall])
+        (input_loop [@tailcall]) ()
     | Failure s ->
         let () = printf "%s\n" s in
-        (input_loop () [@tailcall])
+        (input_loop [@tailcall]) ()
 
 let rec game_loop state =
   let open Game_state in
