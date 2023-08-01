@@ -42,7 +42,7 @@ let rec input_loop () =
 let rec game_loop state =
   let open Game_state in
   if Option.is_some (winner state) then
-    printf "%s wins!!!\n" (if winner state = Some P1 then "P1" else "P2")
+    printf "\n%s wins!!!\n" (if winner state = Some P1 then "P1" else "P2")
   else
     let () = printf "%s" (string_of_state state) in
     let () = printf "Enter: Row Column U/D L/R J/S\n" in
