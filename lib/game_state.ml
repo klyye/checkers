@@ -14,8 +14,7 @@ type t = {
 let board state = state.board
 let player_dirs = [ (P1, U); (P2, D) ]
 
-let piece_dirs piece =
-  match piece with
+let piece_dirs = function
   | { is_king = true; _ } -> [ (U, L); (U, R); (D, L); (D, R) ]
   | { player = p; is_king = false } ->
       let v = List.assoc p player_dirs in
