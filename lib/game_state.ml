@@ -7,6 +7,7 @@ exception IllegalMove
 type t = {
   board : Board.t;
   curr_player : player;
+  turn_count : int;
   capturing_piece : (int * int) option;
       (* TODO: hash map of board states to counts for three move stalemates clause *)
 }
@@ -73,8 +74,8 @@ let legal_moves state =
 let is_legal state move = MoveSet.mem move (legal_moves state)
 
 (* https://stackoverflow.com/questions/1667232/optional-argument-cannot-be-erased *)
-let init board ?(capturing_piece = None) curr_player =
-  { board; curr_player; capturing_piece }
+let init board ?(capturing_piece = None) ?(turn_count = 0) curr_player =
+  { board; curr_player; capturing_piece; turn_count }
 
 let is_promoted piece row =
   (not piece.is_king)
@@ -97,6 +98,7 @@ let make_move state move =
           board = placed;
           curr_player = piece.player;
           capturing_piece = Some (jump_r, jump_c);
+          turn_count = state.turn_count + 1;
         }
       in
       let jumps_possible = legal_moves post_jump_state in
@@ -105,6 +107,7 @@ let make_move state move =
           board = placed;
           curr_player = opp_player piece.player;
           capturing_piece = None;
+          turn_count = state.turn_count + 1;
         }
       else post_jump_state
     else
@@ -116,6 +119,7 @@ let make_move state move =
         board = placed;
         curr_player = opp_player state.curr_player;
         capturing_piece = None;
+        turn_count = state.turn_count + 1;
       }
   else raise IllegalMove
 
@@ -137,3 +141,4 @@ let winner state =
   else None
 
 let current_player state = state.curr_player
+let turn_count state = state.turn_count

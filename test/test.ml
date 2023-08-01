@@ -434,7 +434,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P2)
+              init b P2 ~turn_count:3)
              (make_moves state
                 [
                   { r = 6; c = 2; dir = (U, L); is_jump = false };
@@ -458,7 +458,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P1 ~capturing_piece:(Some (5, 4)))
+              init b P1 ~capturing_piece:(Some (5, 4)) ~turn_count:1)
              (make_moves state
                 [ { r = 7; c = 2; dir = (U, R); is_jump = true } ]) );
          ( "mid jump 2" >:: fun tc ->
@@ -478,7 +478,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P1 ~capturing_piece:(Some (3, 6)))
+              init b P1 ~capturing_piece:(Some (3, 6)) ~turn_count:2)
              (make_moves state
                 [
                   { r = 7; c = 2; dir = (U, R); is_jump = true };
@@ -501,7 +501,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P2)
+              init b P2 ~turn_count:2)
              (make_moves state
                 [
                   { r = 5; c = 3; dir = (U, R); is_jump = true };
@@ -524,7 +524,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P2)
+              init b P2 ~turn_count:2)
              (make_moves state
                 [
                   { r = 5; c = 3; dir = (U, R); is_jump = true };
@@ -547,7 +547,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P2)
+              init b P2 ~turn_count:2)
              (make_moves state
                 [
                   { r = 7; c = 2; dir = (U, R); is_jump = true };
@@ -570,7 +570,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P2)
+              init b P2 ~turn_count:3)
              (make_moves state
                 [
                   { r = 7; c = 2; dir = (U, R); is_jump = true };
@@ -594,7 +594,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P2)
+              init b P2 ~turn_count:2)
              (make_moves state
                 [
                   { r = 6; c = 3; dir = (U, L); is_jump = true };
@@ -617,7 +617,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P2)
+              init b P2 ~turn_count:2)
              (make_moves state
                 [
                   { r = 6; c = 3; dir = (U, R); is_jump = true };
@@ -640,7 +640,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P2)
+              init b P2 ~turn_count:2)
              (make_moves state
                 [
                   { r = 2; c = 3; dir = (D, R); is_jump = true };
@@ -674,7 +674,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P2)
+              init b P2 ~turn_count:4)
              (make_moves state
                 [
                   { r = 2; c = 3; dir = (D, R); is_jump = true };
@@ -699,7 +699,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P2)
+              init b P2 ~turn_count:1)
              (make_moves state
                 [ { r = 2; c = 0; dir = (U, R); is_jump = true } ]) );
          ( "promotion ends turn 1" >:: fun tc ->
@@ -727,7 +727,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P1)
+              init b P1 ~turn_count:2)
              (make_moves state
                 [
                   { r = 2; c = 0; dir = (U, R); is_jump = true };
@@ -750,7 +750,7 @@ let make_move_tests =
                     [ o; o; o; o; o; o; o; o ] (* 7 *);
                   ]
               in
-              init b P2)
+              init b P2 ~turn_count:2)
              (make_moves state
                 [
                   { r = 2; c = 2; dir = (U, R); is_jump = true };
