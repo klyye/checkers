@@ -21,10 +21,8 @@ let heuristic state =
         (fun coord score ->
           let r, c = coord in
           let piece = Option.get (Board.get board r c) in
-          let home_row = if piece.player = P1 then 7 else 0 in
           let polarity = if piece.player = P1 then 1 else -1 in
-          (polarity * if piece.is_king then 200 else 15 * abs (r - home_row))
-          + score)
+          (polarity * if piece.is_king then 200 else 100) + score)
         coordset 0
 
 (* https://www.youtube.com/watch?v=l-hh51ncgDI *)
